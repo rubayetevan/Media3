@@ -1,5 +1,5 @@
 
-# Media3 Android Project
+# Media3 Android Sample Project
 
 Media3 is an Android project that showcases the capabilities of the Media3 API for playing and controlling media content. The project features various functionalities, including playing media content from a URL, controlling media playback, zooming in on videos, handling device orientation changes, displaying media in full-screen mode, and providing user feedback for media errors.
 
