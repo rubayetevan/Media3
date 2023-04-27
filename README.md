@@ -30,14 +30,6 @@ The Media3 project comprises several classes, including:
 -   `ScaleGestureListener`: This class handles the pinch-to-zoom capabilities of the media player's playback controls.
 - `player_controller.xml`: Provides custom controller to the player.
 
-## Contributing
-
-If you wish to contribute to the Media3 project, please fork the repository, make your changes, and submit a pull request. The project welcomes contributions of any kind, including bug fixes, new features, and documentation improvements.
-
-## License
-
-The Media3 project is licensed under the Apache License 2.0. For more information, please see the LICENSE file.
-
 ## Acknowledgments
 
 The Media3 project was inspired by the official Android documentation on Media3 API. The project team would like to express their gratitude to the Android development community for their support and contributions.
