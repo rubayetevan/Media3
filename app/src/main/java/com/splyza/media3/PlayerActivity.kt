@@ -60,6 +60,7 @@ class PlayerActivity : AppCompatActivity(), PlayerView.ControllerVisibilityListe
             false
         }
 
+
         savedInstanceState?.let {
             startAutoPlay = it.getBoolean(KEY_AUTO_PLAY)
             startPosition = it.getLong(KEY_POSITION)
