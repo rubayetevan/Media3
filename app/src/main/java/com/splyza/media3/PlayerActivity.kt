@@ -6,7 +6,6 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.KeyEvent
 import android.view.ScaleGestureDetector
 import android.view.View
@@ -20,7 +19,6 @@ import androidx.media3.common.MediaItem
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.util.EventLogger
 import androidx.media3.ui.AspectRatioFrameLayout
-import androidx.media3.ui.PlayerView
 import com.splyza.media3.Keys.KEY_AUTO_PLAY
 import com.splyza.media3.Keys.KEY_POSITION
 import com.splyza.media3.databinding.ActivityPlayerBinding
@@ -28,7 +26,7 @@ import com.splyza.media3.databinding.PlayerControllerBinding
 import kotlin.math.max
 
 
-class PlayerActivity : AppCompatActivity(), PlayerView.ControllerVisibilityListener {
+class PlayerActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "PlayerActivity"
     }
@@ -52,11 +50,13 @@ class PlayerActivity : AppCompatActivity(), PlayerView.ControllerVisibilityListe
 
     @SuppressLint("ClickableViewAccessibility")
     private fun setupVideoPlayer(savedInstanceState: Bundle?) {
-        binding.playerView.setControllerVisibilityListener(this)
         binding.playerView.setErrorMessageProvider(PlayerErrorMessageProvider())
         binding.playerView.requestFocus()
+        hideController()
         controllerBinding.gestureView.setOnTouchListener { view, motionEvent ->
             scaleGestureDetector?.onTouchEvent(motionEvent)
+            controllerBinding.controllerView.visibility = View.VISIBLE
+            hideController()
             true
         }
 
@@ -72,8 +72,6 @@ class PlayerActivity : AppCompatActivity(), PlayerView.ControllerVisibilityListe
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     private fun setupPlayerController() {
-
-        controllerBinding.fullscreen.visibility = View.VISIBLE
         controllerBinding.fullscreen.setOnClickListener {
             val currentOrientation = resources.configuration.orientation
             requestedOrientation = if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -184,9 +182,6 @@ class PlayerActivity : AppCompatActivity(), PlayerView.ControllerVisibilityListe
         outState.putLong(KEY_POSITION, startPosition)
     }
 
-    override fun onVisibilityChanged(visibility: Int) {
-        Log.d(TAG, "onVisibilityChanged::controllerVisibility = $visibility")
-    }
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         return binding.playerView.dispatchKeyEvent(event) || super.dispatchKeyEvent(event)
@@ -204,6 +199,13 @@ class PlayerActivity : AppCompatActivity(), PlayerView.ControllerVisibilityListe
         } else {
             binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
         }
+    }
+
+    private fun hideController() {
+        controllerBinding.controllerView.postDelayed({
+            controllerBinding.controllerView.visibility =
+                View.GONE
+        }, 3000)
     }
 
 }
