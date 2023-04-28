@@ -6,6 +6,8 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.KeyEvent
 import android.view.ScaleGestureDetector
 import android.view.View
@@ -16,9 +18,12 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.util.EventLogger
 import androidx.media3.ui.AspectRatioFrameLayout
+import androidx.media3.ui.TimeBar
 import com.splyza.media3.Keys.KEY_AUTO_PLAY
 import com.splyza.media3.Keys.KEY_POSITION
 import com.splyza.media3.databinding.ActivityPlayerBinding
@@ -29,6 +34,8 @@ import kotlin.math.max
 class PlayerActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "PlayerActivity"
+        private const val PROGRESS_UPDATE_INTERVAL_MS = 1000L
+        private const val CONTROLLER_HIDE_TIMEOUT_MS = 5000L
     }
 
     private lateinit var binding: ActivityPlayerBinding
@@ -37,6 +44,8 @@ class PlayerActivity : AppCompatActivity() {
     private var startAutoPlay = false
     private var startPosition: Long = 0
     private var scaleGestureDetector: ScaleGestureDetector? = null
+    private var handler: Handler? = null
+    private var isScrubbing = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -113,6 +122,7 @@ class PlayerActivity : AppCompatActivity() {
             player = null
             binding.playerView.player = null
         }
+        handler?.removeCallbacks(updateProgressAction)
     }
 
     private fun updateStartPosition() {
@@ -158,20 +168,24 @@ class PlayerActivity : AppCompatActivity() {
         val mediaItem = MediaItem.fromUri(videoUri)
 
         if (player == null) {
+            if (handler == null) {
+                handler = Handler(Looper.getMainLooper())
+            }
             val playerBuilder = ExoPlayer.Builder(this@PlayerActivity)
             player = playerBuilder.build()
-            player?.addListener(PlayerEventListener())
+            player?.addListener(playerEventListener)
             player?.addAnalyticsListener(EventLogger())
             player?.setAudioAttributes(AudioAttributes.DEFAULT, true)
             player?.playWhenReady = startAutoPlay
             binding.playerView.player = player
+            controllerBinding.timeBar.addListener(playerSeekBarListener)
         }
-
         player?.setMediaItem(mediaItem)
         player?.prepare()
         if (startPosition != C.TIME_UNSET) {
             player?.seekTo(startPosition)
         }
+
         return true
     }
 
@@ -181,7 +195,6 @@ class PlayerActivity : AppCompatActivity() {
         outState.putBoolean(KEY_AUTO_PLAY, startAutoPlay)
         outState.putLong(KEY_POSITION, startPosition)
     }
-
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         return binding.playerView.dispatchKeyEvent(event) || super.dispatchKeyEvent(event)
@@ -205,7 +218,55 @@ class PlayerActivity : AppCompatActivity() {
         controllerBinding.controllerView.postDelayed({
             controllerBinding.controllerView.visibility =
                 View.GONE
-        }, 3000)
+        }, CONTROLLER_HIDE_TIMEOUT_MS)
+    }
+
+
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    private val updateProgressAction = object : Runnable {
+        override fun run() {
+            if (!isScrubbing) {
+                player?.let { controllerBinding.timeBar.setPosition(it.currentPosition) }
+            }
+            handler?.postDelayed(this, PROGRESS_UPDATE_INTERVAL_MS)
+        }
+    }
+
+    @UnstableApi
+    private val playerSeekBarListener = object : TimeBar.OnScrubListener {
+
+        override fun onScrubStart(timeBar: TimeBar, position: Long) {
+            isScrubbing = true
+            player?.playWhenReady = false
+            handler?.removeCallbacks(updateProgressAction)
+        }
+
+        override fun onScrubMove(timeBar: TimeBar, position: Long) {
+            timeBar.setPosition(position)
+        }
+
+        override fun onScrubStop(timeBar: TimeBar, position: Long, canceled: Boolean) {
+            isScrubbing = false
+            if (!canceled) {
+                player?.seekTo(position)
+            }
+            player?.playWhenReady = true
+            handler?.post(updateProgressAction)
+        }
+    }
+
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    private val playerEventListener = object : Player.Listener {
+        override fun onPlaybackStateChanged(playbackState: Int) {
+            if (playbackState == Player.STATE_READY) {
+                player?.duration?.let {
+                    controllerBinding.timeBar.setDuration(it)
+                }
+                handler?.post(updateProgressAction)
+            } else {
+                handler?.removeCallbacks(updateProgressAction)
+            }
+        }
     }
 
 }
