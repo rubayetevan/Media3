@@ -38,9 +38,7 @@ class PlayerActivity : AppCompatActivity(), PlayerView.ControllerVisibilityListe
     private var player: ExoPlayer? = null
     private var startAutoPlay = false
     private var startPosition: Long = 0
-
     private var scaleGestureDetector: ScaleGestureDetector? = null
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -151,7 +149,6 @@ class PlayerActivity : AppCompatActivity(), PlayerView.ControllerVisibilityListe
         releasePlayer()
     }
 
-
     @SuppressLint("UnsafeOptInUsageError")
     private fun initializePlayer(): Boolean {
         val url = intent.getStringExtra(Keys.VIDEO_SOURCE)
@@ -194,7 +191,6 @@ class PlayerActivity : AppCompatActivity(), PlayerView.ControllerVisibilityListe
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         return binding.playerView.dispatchKeyEvent(event) || super.dispatchKeyEvent(event)
     }
-
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
