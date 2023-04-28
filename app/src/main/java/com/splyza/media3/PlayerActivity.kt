@@ -10,7 +10,6 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.ScaleGestureDetector
 import android.view.View
-import android.widget.ImageButton
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -25,6 +24,7 @@ import androidx.media3.ui.PlayerView
 import com.splyza.media3.Keys.KEY_AUTO_PLAY
 import com.splyza.media3.Keys.KEY_POSITION
 import com.splyza.media3.databinding.ActivityPlayerBinding
+import com.splyza.media3.databinding.PlayerControllerBinding
 import kotlin.math.max
 
 
@@ -34,6 +34,7 @@ class PlayerActivity : AppCompatActivity(), PlayerView.ControllerVisibilityListe
     }
 
     private lateinit var binding: ActivityPlayerBinding
+    private lateinit var controllerBinding: PlayerControllerBinding
     private var player: ExoPlayer? = null
     private var startAutoPlay = false
     private var startPosition: Long = 0
@@ -46,6 +47,7 @@ class PlayerActivity : AppCompatActivity(), PlayerView.ControllerVisibilityListe
         initImmersiveMode()
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         val view = binding.root
+        controllerBinding = PlayerControllerBinding.bind(view)
         setContentView(view)
         setupVideoPlayer(savedInstanceState)
     }
@@ -55,11 +57,10 @@ class PlayerActivity : AppCompatActivity(), PlayerView.ControllerVisibilityListe
         binding.playerView.setControllerVisibilityListener(this)
         binding.playerView.setErrorMessageProvider(PlayerErrorMessageProvider())
         binding.playerView.requestFocus()
-        binding.playerView.setOnTouchListener { view, motionEvent ->
+        controllerBinding.gestureView.setOnTouchListener { view, motionEvent ->
             scaleGestureDetector?.onTouchEvent(motionEvent)
-            false
+            true
         }
-
 
         savedInstanceState?.let {
             startAutoPlay = it.getBoolean(KEY_AUTO_PLAY)
@@ -67,28 +68,27 @@ class PlayerActivity : AppCompatActivity(), PlayerView.ControllerVisibilityListe
         } ?: run {
             clearStartPosition()
         }
+        setPlayerSize()
         setupPlayerController()
     }
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     private fun setupPlayerController() {
-        val fullScreenBtn = findViewById<ImageButton>(R.id.exo_fullscreen)
-        fullScreenBtn.visibility = View.VISIBLE
-        fullScreenBtn.setOnClickListener {
+
+        controllerBinding.fullscreen.visibility = View.VISIBLE
+        controllerBinding.fullscreen.setOnClickListener {
             val currentOrientation = resources.configuration.orientation
             requestedOrientation = if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
-                scaleGestureDetector =
-                    ScaleGestureDetector(
-                        this@PlayerActivity,
-                        ScaleGestureListener(binding.playerView)
-                    )
                 ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
             } else {
-                scaleGestureDetector = null
-                binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
                 ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             }
         }
+        scaleGestureDetector =
+            ScaleGestureDetector(
+                this@PlayerActivity,
+                ScaleGestureListener(binding.playerView)
+            )
     }
 
     private fun initImmersiveMode() {
@@ -193,6 +193,21 @@ class PlayerActivity : AppCompatActivity(), PlayerView.ControllerVisibilityListe
 
     override fun dispatchKeyEvent(event: KeyEvent): Boolean {
         return binding.playerView.dispatchKeyEvent(event) || super.dispatchKeyEvent(event)
+    }
+
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        setPlayerSize(newConfig)
+    }
+
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+    private fun setPlayerSize(newConfig: Configuration = resources.configuration) {
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
+        } else {
+            binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+        }
     }
 
 }
