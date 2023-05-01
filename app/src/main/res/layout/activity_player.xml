@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black"
+    android:paddingBottom="16dp"
     tools:context=".PlayerActivity">
 
     <LinearLayout
@@ -26,7 +27,249 @@
             app:use_controller="false" />
     </LinearLayout>
 
-    <include layout="@layout/player_controller" />
+    <FrameLayout
+        android:id="@+id/gestureView"
+        android:layout_width="0dp"
+        android:layout_height="270dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        tools:ignore="MissingDefaultResource">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/controllerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/close"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:layout_gravity="end"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/baseline_close_24"
+                android:foreground="?attr/selectableItemBackground"
+                app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.0" />
+
+
+            <FrameLayout
+                android:id="@id/exo_bottom_bar"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layoutDirection="ltr"
+                app:layout_constraintBottom_toTopOf="@+id/timeBar"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+                app:layout_constraintVertical_bias="1.0">
+
+                <LinearLayout
+                    android:id="@id/exo_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|start"
+                    android:layoutDirection="ltr"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/position"
+                        style="@style/ExoStyledControls.TimeText.Position" />
+
+                    <TextView
+                        style="@style/ExoStyledControls.TimeText.Separator"
+                        android:text="/" />
+
+                    <TextView
+                        android:id="@+id/duration"
+                        style="@style/ExoStyledControls.TimeText.Duration" />
+
+                    <TextView
+                        android:id="@+id/speedTV"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_marginStart="24dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:foreground="?attr/selectableItemBackground"
+                        android:gravity="center"
+                        android:text="x1"
+                        android:textColor="@color/white"
+                        android:textSize="18sp" />
+
+                    <ImageButton
+                        android:id="@+id/pauseEditBtn"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_marginStart="30dp"
+                        android:layout_marginEnd="16dp"
+                        android:background="@drawable/pencil_pause"
+                        android:foreground="?attr/selectableItemBackground" />
+
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@id/exo_basic_controls"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical|end"
+                    android:layoutDirection="ltr">
+
+                    <ImageButton
+                        android:id="@+id/fullscreen"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_marginEnd="16dp"
+                        android:background="@drawable/baseline_fullscreen_24"
+                        android:foreground="?attr/selectableItemBackground" />
+
+                </LinearLayout>
+
+
+            </FrameLayout>
+
+            <androidx.media3.ui.DefaultTimeBar
+                android:id="@+id/timeBar"
+                android:layout_width="0dp"
+                android:layout_height="@dimen/exo_styled_progress_layout_height"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+                app:layout_constraintVertical_bias="0.7" />
+
+            <LinearLayout
+                android:id="@+id/linearLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|end"
+                android:gravity="center_vertical"
+                android:layoutDirection="ltr"
+                android:orientation="horizontal"
+                android:paddingEnd="16dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/exo_bottom_bar"
+                app:layout_constraintVertical_bias="1.0">
+
+                <ImageButton
+                    android:id="@+id/clocBackward"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="24dp"
+                    android:background="@drawable/baseline_clock_backward"
+                    android:foreground="?attr/selectableItemBackground" />
+
+                <ImageButton
+                    android:id="@+id/clockForward"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/baseline_clock_forward"
+
+                    android:foreground="?attr/selectableItemBackground" />
+
+            </LinearLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/constraintLayout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:background="@android:color/transparent"
+                android:clipToPadding="false"
+                android:gravity="center"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.35000002">
+
+                <ImageButton
+                    android:id="@+id/prevBTN"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_marginStart="16dp"
+                    android:background="@drawable/prev"
+                    android:foreground="?attr/selectableItemBackground"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageButton
+                    android:id="@+id/replayBTN"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="28dp"
+                    android:background="@drawable/baseline_replay_5_24"
+                    android:foreground="?attr/selectableItemBackground"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/prevBTN"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageButton
+                    android:id="@+id/playPauseBtn"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:background="@drawable/baseline_pause_24"
+                    android:foreground="?attr/selectableItemBackground"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/forwardBTN"
+                    app:layout_constraintStart_toEndOf="@+id/replayBTN"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageButton
+                    android:id="@+id/forwardBTN"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_marginEnd="36dp"
+                    android:background="@drawable/baseline_forward_5_24"
+                    android:foreground="?attr/selectableItemBackground"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/nextBTN"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageButton
+                    android:id="@+id/nextBTN"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:layout_marginEnd="16dp"
+                    android:background="@drawable/next"
+                    android:foreground="?attr/selectableItemBackground"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <ImageButton
+                android:id="@+id/menu"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:background="@drawable/elipsis_circle"
+                android:foreground="?attr/selectableItemBackground"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/linearLayout"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/exo_bottom_bar"
+                app:layout_constraintVertical_bias="1.0" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </FrameLayout>
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

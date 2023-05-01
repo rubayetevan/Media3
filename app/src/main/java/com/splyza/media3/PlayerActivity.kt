@@ -34,7 +34,7 @@ import kotlin.math.max
 class PlayerActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "PlayerActivity"
-        private const val CONTROLLER_HIDE_TIMEOUT_MS = 10000L
+        private const val CONTROLLER_HIDE_TIMEOUT_MS = 5000L
     }
 
     private lateinit var binding: ActivityPlayerBinding
