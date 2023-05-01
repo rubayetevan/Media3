@@ -23,7 +23,6 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.util.EventLogger
-import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.TimeBar
 import com.splyza.media3.Keys.KEY_AUTO_PLAY
 import com.splyza.media3.Keys.KEY_POSITION
@@ -75,7 +74,6 @@ class PlayerActivity : AppCompatActivity() {
         } ?: run {
             clearStartPosition()
         }
-        setPlayerSize()
         setupPlayerController()
     }
 
@@ -104,6 +102,8 @@ class PlayerActivity : AppCompatActivity() {
             }
         }
 
+
+
         controllerBinding.replayBTN.setOnClickListener {
 
             player?.let {
@@ -118,7 +118,7 @@ class PlayerActivity : AppCompatActivity() {
                     it.seekTo(it.contentPosition + 5000L)
                 }
             }
-        }  
+        }
         controllerBinding.close.setOnClickListener {
             finish()
         }
@@ -212,6 +212,11 @@ class PlayerActivity : AppCompatActivity() {
         if (startPosition != C.TIME_UNSET) {
             player?.seekTo(startPosition)
         }
+        if (startAutoPlay) {
+            controllerBinding.playPauseBtn.setBackgroundResource(R.drawable.baseline_pause_24)
+        } else {
+            controllerBinding.playPauseBtn.setBackgroundResource(R.drawable.baseline_play_arrow_24)
+        }
 
         return true
     }
@@ -227,23 +232,10 @@ class PlayerActivity : AppCompatActivity() {
         return binding.playerView.dispatchKeyEvent(event) || super.dispatchKeyEvent(event)
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        setPlayerSize(newConfig)
-    }
-
-    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-    private fun setPlayerSize(newConfig: Configuration = resources.configuration) {
-        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
-        } else {
-            binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-        }
-    }
 
     private fun hideController() {
         controllerBinding.controllerView.postDelayed({
-            controllerBinding.controllerView.visibility = View.GONE
+            controllerBinding.controllerView.visibility = View.INVISIBLE
         }, CONTROLLER_HIDE_TIMEOUT_MS)
     }
 
