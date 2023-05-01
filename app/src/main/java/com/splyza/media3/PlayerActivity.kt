@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.KeyEvent
 import android.view.ScaleGestureDetector
 import android.view.View
@@ -34,8 +35,7 @@ import kotlin.math.max
 class PlayerActivity : AppCompatActivity() {
     companion object {
         private const val TAG = "PlayerActivity"
-        private const val PROGRESS_UPDATE_INTERVAL_MS = 1000L
-        private const val CONTROLLER_HIDE_TIMEOUT_MS = 5000L
+        private const val CONTROLLER_HIDE_TIMEOUT_MS = 10000L
     }
 
     private lateinit var binding: ActivityPlayerBinding
@@ -82,6 +82,7 @@ class PlayerActivity : AppCompatActivity() {
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     private fun setupPlayerController() {
         controllerBinding.fullscreen.setOnClickListener {
+            Log.d(TAG, "controllerBinding.fullscreenTV.setOnClickListener::clicked")
             val currentOrientation = resources.configuration.orientation
             requestedOrientation = if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
                 ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
@@ -89,17 +90,44 @@ class PlayerActivity : AppCompatActivity() {
                 ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             }
         }
-        scaleGestureDetector =
-            ScaleGestureDetector(
-                this@PlayerActivity,
-                ScaleGestureListener(binding.playerView)
-            )
+        scaleGestureDetector = ScaleGestureDetector(
+            this@PlayerActivity, ScaleGestureListener(binding.playerView)
+        )
+
+        controllerBinding.playPauseBtn.setOnClickListener {
+            if (player?.isPlaying == true) {
+                player?.pause()
+                controllerBinding.playPauseBtn.setBackgroundResource(R.drawable.baseline_play_arrow_24)
+            } else {
+                player?.play()
+                controllerBinding.playPauseBtn.setBackgroundResource(R.drawable.baseline_pause_24)
+            }
+        }
+
+        controllerBinding.replayBTN.setOnClickListener {
+
+            player?.let {
+                if (it.contentPosition >= 5000L) {
+                    it.seekTo(it.contentPosition - 5000L)
+                }
+            }
+        }
+        controllerBinding.forwardBTN.setOnClickListener {
+            player?.let {
+                if (it.contentPosition <= it.duration - 5000L) {
+                    it.seekTo(it.contentPosition + 5000L)
+                }
+            }
+        }  
+        controllerBinding.close.setOnClickListener {
+            finish()
+        }
     }
+
 
     private fun initImmersiveMode() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        val windowInsetsController =
-            WindowCompat.getInsetsController(window, window.decorView)
+        val windowInsetsController = WindowCompat.getInsetsController(window, window.decorView)
         windowInsetsController.systemBarsBehavior =
             WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
 
@@ -161,8 +189,7 @@ class PlayerActivity : AppCompatActivity() {
     private fun initializePlayer(): Boolean {
         val url = intent.getStringExtra(Keys.VIDEO_SOURCE)
 
-        if (url.isNullOrBlank())
-            return false
+        if (url.isNullOrBlank()) return false
 
         val videoUri: Uri = Uri.parse(url)
         val mediaItem = MediaItem.fromUri(videoUri)
@@ -216,8 +243,7 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun hideController() {
         controllerBinding.controllerView.postDelayed({
-            controllerBinding.controllerView.visibility =
-                View.GONE
+            controllerBinding.controllerView.visibility = View.GONE
         }, CONTROLLER_HIDE_TIMEOUT_MS)
     }
 
@@ -226,9 +252,12 @@ class PlayerActivity : AppCompatActivity() {
     private val updateProgressAction = object : Runnable {
         override fun run() {
             if (!isScrubbing) {
-                player?.let { controllerBinding.timeBar.setPosition(it.currentPosition) }
+                player?.let {
+                    controllerBinding.position.text = getPlayerTime(it.currentPosition)
+                    controllerBinding.timeBar.setPosition(it.contentPosition)
+                }
             }
-            handler?.postDelayed(this, PROGRESS_UPDATE_INTERVAL_MS)
+            handler?.post(this)
         }
     }
 
@@ -261,12 +290,20 @@ class PlayerActivity : AppCompatActivity() {
             if (playbackState == Player.STATE_READY) {
                 player?.duration?.let {
                     controllerBinding.timeBar.setDuration(it)
+                    controllerBinding.duration.text = getPlayerTime(it)
                 }
                 handler?.post(updateProgressAction)
             } else {
                 handler?.removeCallbacks(updateProgressAction)
             }
         }
+    }
+
+    private fun getPlayerTime(mills: Long): String {
+        val hours = mills / 1000 / 60 / 60
+        val minutes = mills / 1000 / 60 % 60
+        val seconds = (mills / 1000) % 60
+        return String.format("%d:%02d:%02d", hours, minutes, seconds)
     }
 
 }
