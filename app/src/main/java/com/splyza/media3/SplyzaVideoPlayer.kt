@@ -73,7 +73,7 @@ class SplyzaVideoPlayer : ConstraintLayout {
     private var intent: Intent? = null
 
     init {
-        val rootView = LayoutInflater.from(context).inflate(R.layout.activity_player, this, true)
+        val rootView = LayoutInflater.from(context).inflate(R.layout.player_view, this, true)
         playerView = rootView.findViewById(R.id.playerView)
         gestureView = rootView.findViewById(R.id.gestureView)
         controllerView = rootView.findViewById(R.id.controllerView)
