@@ -16,6 +16,7 @@ import android.view.LayoutInflater
 import android.view.ScaleGestureDetector
 import android.view.View
 import android.widget.ImageButton
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
@@ -62,6 +63,7 @@ class SplyzaVideoPlayer : ConstraintLayout {
     private var timeBar: TimeBar
     private var positionTV: TextView
     private var durationTV: TextView
+    private var progressBar: ProgressBar
 
 
     private var player: ExoPlayer? = null
@@ -85,6 +87,7 @@ class SplyzaVideoPlayer : ConstraintLayout {
         timeBar = rootView.findViewById(R.id.timeBar)
         positionTV = rootView.findViewById(R.id.position)
         durationTV = rootView.findViewById(R.id.duration)
+        progressBar = rootView.findViewById(R.id.progressBar)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -277,6 +280,15 @@ class SplyzaVideoPlayer : ConstraintLayout {
                 handler?.post(updateProgressAction)
             } else {
                 handler?.removeCallbacks(updateProgressAction)
+            }
+        }
+
+        override fun onIsLoadingChanged(isLoading: Boolean) {
+            super.onIsLoadingChanged(isLoading)
+            if (isLoading) {
+                progressBar.setVisibility(View.VISIBLE)
+            } else {
+                progressBar.setVisibility(View.GONE)
             }
         }
     }
