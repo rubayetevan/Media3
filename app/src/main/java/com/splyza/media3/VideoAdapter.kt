@@ -33,8 +33,8 @@ class VideoAdapter(private val context: Context, private val videoData: VideoDat
         holder.binding.subTitleTV.text = video.subtitle
         Picasso.get().load(getThumbUrl(video)).into(holder.binding.thumbIMGV)
         holder.binding.root.setOnClickListener {
-            val intent = Intent(context, PlayerActivity::class.java)
-            intent.putExtra(Keys.VIDEO_SOURCE, video.sources[0])
+            val intent = Intent(context, TestActivity::class.java)
+            intent.putExtra(SplyzaVideoPlayer.VIDEO_SOURCE, video.sources[0])
             context.startActivity(intent)
         }
     }
