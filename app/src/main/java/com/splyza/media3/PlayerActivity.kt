@@ -27,7 +27,6 @@ import androidx.media3.ui.TimeBar
 import com.splyza.media3.Keys.KEY_AUTO_PLAY
 import com.splyza.media3.Keys.KEY_POSITION
 import com.splyza.media3.databinding.ActivityPlayerBinding
-import com.splyza.media3.databinding.PlayerControllerBinding
 import kotlin.math.max
 
 
@@ -38,7 +37,6 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private lateinit var binding: ActivityPlayerBinding
-    private lateinit var controllerBinding: PlayerControllerBinding
     private var player: ExoPlayer? = null
     private var startAutoPlay = false
     private var startPosition: Long = 0
@@ -51,7 +49,6 @@ class PlayerActivity : AppCompatActivity() {
         initImmersiveMode()
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         val view = binding.root
-        controllerBinding = PlayerControllerBinding.bind(view)
         setContentView(view)
         setupVideoPlayer(savedInstanceState)
     }
@@ -61,9 +58,9 @@ class PlayerActivity : AppCompatActivity() {
         binding.playerView.setErrorMessageProvider(PlayerErrorMessageProvider())
         binding.playerView.requestFocus()
         hideController()
-        controllerBinding.gestureView.setOnTouchListener { view, motionEvent ->
+        binding.gestureView.setOnTouchListener { view, motionEvent ->
             scaleGestureDetector?.onTouchEvent(motionEvent)
-            controllerBinding.controllerView.visibility = View.VISIBLE
+            binding.controllerView.visibility = View.VISIBLE
             hideController()
             true
         }
@@ -79,8 +76,8 @@ class PlayerActivity : AppCompatActivity() {
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     private fun setupPlayerController() {
-        controllerBinding.fullscreen.setOnClickListener {
-            Log.d(TAG, "controllerBinding.fullscreenTV.setOnClickListener::clicked")
+        binding.fullscreen.setOnClickListener {
+            Log.d(TAG, "binding.fullscreenTV.setOnClickListener::clicked")
             val currentOrientation = resources.configuration.orientation
             requestedOrientation = if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
                 ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
@@ -88,23 +85,22 @@ class PlayerActivity : AppCompatActivity() {
                 ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
             }
         }
+
         scaleGestureDetector = ScaleGestureDetector(
             this@PlayerActivity, ScaleGestureListener(binding.playerView)
         )
 
-        controllerBinding.playPauseBtn.setOnClickListener {
+        binding.playPauseBtn.setOnClickListener {
             if (player?.isPlaying == true) {
                 player?.pause()
-                controllerBinding.playPauseBtn.setBackgroundResource(R.drawable.baseline_play_arrow_24)
+                binding.playPauseBtn.setBackgroundResource(R.drawable.baseline_play_arrow_24)
             } else {
                 player?.play()
-                controllerBinding.playPauseBtn.setBackgroundResource(R.drawable.baseline_pause_24)
+                binding.playPauseBtn.setBackgroundResource(R.drawable.baseline_pause_24)
             }
         }
 
-
-
-        controllerBinding.replayBTN.setOnClickListener {
+        binding.replayBTN.setOnClickListener {
 
             player?.let {
                 if (it.contentPosition >= 5000L) {
@@ -112,14 +108,16 @@ class PlayerActivity : AppCompatActivity() {
                 }
             }
         }
-        controllerBinding.forwardBTN.setOnClickListener {
+
+        binding.forwardBTN.setOnClickListener {
             player?.let {
                 if (it.contentPosition <= it.duration - 5000L) {
                     it.seekTo(it.contentPosition + 5000L)
                 }
             }
         }
-        controllerBinding.close.setOnClickListener {
+
+        binding.close.setOnClickListener {
             finish()
         }
     }
@@ -205,7 +203,7 @@ class PlayerActivity : AppCompatActivity() {
             player?.setAudioAttributes(AudioAttributes.DEFAULT, true)
             player?.playWhenReady = startAutoPlay
             binding.playerView.player = player
-            controllerBinding.timeBar.addListener(playerSeekBarListener)
+            binding.timeBar.addListener(playerSeekBarListener)
         }
         player?.setMediaItem(mediaItem)
         player?.prepare()
@@ -213,9 +211,9 @@ class PlayerActivity : AppCompatActivity() {
             player?.seekTo(startPosition)
         }
         if (startAutoPlay) {
-            controllerBinding.playPauseBtn.setBackgroundResource(R.drawable.baseline_pause_24)
+            binding.playPauseBtn.setBackgroundResource(R.drawable.baseline_pause_24)
         } else {
-            controllerBinding.playPauseBtn.setBackgroundResource(R.drawable.baseline_play_arrow_24)
+            binding.playPauseBtn.setBackgroundResource(R.drawable.baseline_play_arrow_24)
         }
 
         return true
@@ -234,8 +232,8 @@ class PlayerActivity : AppCompatActivity() {
 
 
     private fun hideController() {
-        controllerBinding.controllerView.postDelayed({
-            controllerBinding.controllerView.visibility = View.INVISIBLE
+        binding.controllerView.postDelayed({
+            binding.controllerView.visibility = View.INVISIBLE
         }, CONTROLLER_HIDE_TIMEOUT_MS)
     }
 
@@ -245,8 +243,8 @@ class PlayerActivity : AppCompatActivity() {
         override fun run() {
             if (!isScrubbing) {
                 player?.let {
-                    controllerBinding.position.text = getPlayerTime(it.currentPosition)
-                    controllerBinding.timeBar.setPosition(it.contentPosition)
+                    binding.position.text = getPlayerTime(it.currentPosition)
+                    binding.timeBar.setPosition(it.contentPosition)
                 }
             }
             handler?.post(this)
@@ -281,8 +279,8 @@ class PlayerActivity : AppCompatActivity() {
         override fun onPlaybackStateChanged(playbackState: Int) {
             if (playbackState == Player.STATE_READY) {
                 player?.duration?.let {
-                    controllerBinding.timeBar.setDuration(it)
-                    controllerBinding.duration.text = getPlayerTime(it)
+                    binding.timeBar.setDuration(it)
+                    binding.duration.text = getPlayerTime(it)
                 }
                 handler?.post(updateProgressAction)
             } else {
