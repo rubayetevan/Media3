@@ -45,7 +45,7 @@ class SplyzaVideoPlayer : ConstraintLayout {
     companion object {
         private const val TAG = "SplyzaVideoPlayer"
         private const val CONTROLLER_HIDE_TIMEOUT_MS = 5000L
-        const val VIDEO_SOURCE = "videoSource"
+        const val KEY_VIDEO_SOURCE = "videoSource"
         const val KEY_POSITION = "position"
         const val KEY_AUTO_PLAY = "auto_play"
     }
@@ -222,7 +222,7 @@ class SplyzaVideoPlayer : ConstraintLayout {
 
     @SuppressLint("UnsafeOptInUsageError")
     private fun initializePlayer(): Boolean {
-        val url = intent?.getStringExtra(VIDEO_SOURCE)
+        val url = intent?.getStringExtra(KEY_VIDEO_SOURCE)
 
         if (url.isNullOrBlank()) return false
 
@@ -286,9 +286,9 @@ class SplyzaVideoPlayer : ConstraintLayout {
         override fun onIsLoadingChanged(isLoading: Boolean) {
             super.onIsLoadingChanged(isLoading)
             if (isLoading) {
-                progressBar.setVisibility(View.VISIBLE)
+                progressBar.visibility = View.VISIBLE
             } else {
-                progressBar.setVisibility(View.GONE)
+                progressBar.visibility = View.GONE
             }
         }
     }
@@ -297,7 +297,7 @@ class SplyzaVideoPlayer : ConstraintLayout {
         val hours = mills / 1000 / 60 / 60
         val minutes = mills / 1000 / 60 % 60
         val seconds = (mills / 1000) % 60
-        return String.format("%d:%02d:%02d", hours, minutes, seconds)
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds)
     }
 
     @UnstableApi
