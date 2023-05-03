@@ -1,4 +1,5 @@
-package com.splyza.media3
+package com.splyza.media
+
 
 import android.util.Log
 import android.view.ScaleGestureDetector

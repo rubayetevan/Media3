@@ -1,49 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/rootCL"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/playerHolderCL"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
 
         <androidx.media3.ui.PlayerView
             android:id="@+id/playerView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            android:layout_height="match_parent"
+            android:keepScreenOn="true"
+            app:surface_type="surface_view"
             app:use_controller="false" />
-
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <Space
-        android:id="@+id/space"
-        android:layout_width="0dp"
-        android:layout_height="60dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/playerHolderCL"
-        app:layout_constraintVertical_bias="0.0" />
+    </LinearLayout>
 
     <FrameLayout
         android:id="@+id/gestureView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="@+id/space"
-        app:layout_constraintEnd_toEndOf="@+id/playerHolderCL"
-        app:layout_constraintStart_toStartOf="@+id/playerHolderCL"
-        app:layout_constraintTop_toTopOf="@+id/playerHolderCL">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="MissingDefaultResource">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/controllerView"
@@ -59,8 +51,7 @@
                 app:layout_constraintBottom_toBottomOf="@+id/exo_bottom_bar"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.51" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageButton
                 android:id="@+id/close"
@@ -85,12 +76,11 @@
                 android:id="@id/exo_bottom_bar"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
                 android:layoutDirection="ltr"
-                app:layout_constraintBottom_toTopOf="@+id/timeBar"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
-                app:layout_constraintVertical_bias="1.0">
+                app:layout_constraintStart_toStartOf="parent">
 
                 <LinearLayout
                     android:id="@id/exo_time"
@@ -116,6 +106,7 @@
                         android:id="@+id/speedTV"
                         android:layout_width="28dp"
                         android:layout_height="28dp"
+                        android:layout_gravity="center"
                         android:layout_marginStart="24dp"
                         android:background="?attr/selectableItemBackground"
                         android:clickable="true"
@@ -130,7 +121,6 @@
                         android:layout_width="28dp"
                         android:layout_height="28dp"
                         android:layout_marginStart="30dp"
-                        android:layout_marginEnd="16dp"
                         android:background="@drawable/pencil_pause"
                         android:foreground="?attr/selectableItemBackground" />
 
@@ -152,6 +142,30 @@
                         android:textColor="@color/white"
                         android:textSize="14sp" />
 
+                    <ImageButton
+                        android:id="@+id/menu"
+                        android:layout_width="28dp"
+                        android:layout_height="28dp"
+                        android:layout_marginStart="30dp"
+                        android:background="@drawable/elipsis_circle"
+                        android:foreground="?attr/selectableItemBackground"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintHorizontal_bias="0.0"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/exo_bottom_bar"
+                        app:layout_constraintVertical_bias="1.0" />
+
+                    <TextView
+                       android:id="@+id/frameTV"
+                        android:textColor="@color/white"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="30dp"
+                        android:layout_marginEnd="16dp"
+                        android:text="動画 (998/999)"
+                        android:textSize="14sp" />
+
 
                 </LinearLayout>
 
@@ -167,7 +181,7 @@
                         android:layout_width="28dp"
                         android:layout_height="28dp"
                         android:layout_marginEnd="16dp"
-                        android:background="@drawable/baseline_fullscreen_24"
+                        android:background="@drawable/baseline_fullscreen_exit_24"
                         android:foreground="?attr/selectableItemBackground" />
 
                 </LinearLayout>
@@ -177,66 +191,44 @@
 
             <androidx.media3.ui.DefaultTimeBar
                 android:id="@+id/timeBar"
-                android:layout_width="0dp"
-                android:layout_height="24dp"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/exo_styled_progress_layout_height"
+                app:layout_constraintBottom_toTopOf="@+id/exo_bottom_bar"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
-                app:layout_constraintVertical_bias="0.82" />
+                app:layout_constraintVertical_bias="1.0" />
 
-            <LinearLayout
-                android:id="@+id/linearLayout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|end"
-                android:layout_marginEnd="28dp"
-                android:gravity="center_vertical"
-                android:layoutDirection="ltr"
-                android:orientation="horizontal"
-                android:paddingEnd="0dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/timeBar"
-                app:layout_constraintVertical_bias="0.41000003">
-
-                <ImageButton
-                    android:id="@+id/clocBackward"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="24dp"
-                    android:background="@drawable/baseline_clock_backward"
-                    android:foreground="?attr/selectableItemBackground" />
-
-                <ImageButton
-                    android:id="@+id/clockForward"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:background="@drawable/baseline_clock_forward"
-
-                    android:foreground="?attr/selectableItemBackground" />
-
-            </LinearLayout>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/constraintLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:color/transparent"
+                android:background="@color/transparent"
                 android:clipToPadding="false"
                 android:gravity="center"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.45">
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageButton
+                    android:id="@+id/clocBackward"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="82dp"
+                    android:background="@drawable/baseline_clock_backward"
+                    android:foreground="?attr/selectableItemBackground"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/replayBTN"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageButton
                     android:id="@+id/prevBTN"
                     android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:layout_marginStart="28dp"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="22dp"
                     android:background="@drawable/prev"
                     android:foreground="?attr/selectableItemBackground"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -246,8 +238,8 @@
                 <ImageButton
                     android:id="@+id/replayBTN"
                     android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_marginStart="74dp"
+                    android:layout_height="0dp"
+                    android:layout_marginStart="90dp"
                     android:background="@drawable/baseline_replay_5_24"
                     android:foreground="?attr/selectableItemBackground"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -261,15 +253,26 @@
                     android:background="@drawable/baseline_pause_24"
                     android:foreground="?attr/selectableItemBackground"
                     app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/clockForward"
+                    app:layout_constraintStart_toEndOf="@+id/clocBackward"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageButton
+                    android:id="@+id/clockForward"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:layout_marginEnd="82dp"
+                    android:background="@drawable/baseline_clock_forward"
+                    android:foreground="?attr/selectableItemBackground"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toStartOf="@+id/forwardBTN"
-                    app:layout_constraintStart_toEndOf="@+id/replayBTN"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageButton
                     android:id="@+id/forwardBTN"
                     android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_marginEnd="74dp"
+                    android:layout_height="0dp"
+                    android:layout_marginEnd="90dp"
                     android:background="@drawable/baseline_forward_5_24"
                     android:foreground="?attr/selectableItemBackground"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -279,8 +282,8 @@
                 <ImageButton
                     android:id="@+id/nextBTN"
                     android:layout_width="28dp"
-                    android:layout_height="28dp"
-                    android:layout_marginEnd="28dp"
+                    android:layout_height="0dp"
+                    android:layout_marginEnd="22dp"
                     android:background="@drawable/next"
                     android:foreground="?attr/selectableItemBackground"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -290,21 +293,9 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
-            <ImageButton
-                android:id="@+id/menu"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="28dp"
-                android:background="@drawable/elipsis_circle"
-                android:foreground="?attr/selectableItemBackground"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/linearLayout"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/timeBar"
-                app:layout_constraintVertical_bias="0.41000003" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
 
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </FrameLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

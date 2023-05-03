@@ -14,3 +14,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "Media3"
 include ':app'
+include ':media'

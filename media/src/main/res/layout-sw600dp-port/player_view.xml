@@ -15,13 +15,14 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.media3.ui.PlayerView
-            app:use_controller="false"
             android:id="@+id/playerView"
+            android:keepScreenOn="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:use_controller="false" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -59,7 +60,8 @@
                 app:layout_constraintBottom_toBottomOf="@+id/exo_bottom_bar"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.51" />
 
             <ImageButton
                 android:id="@+id/close"
@@ -133,6 +135,24 @@
                         android:background="@drawable/pencil_pause"
                         android:foreground="?attr/selectableItemBackground" />
 
+                    <TextView
+                        android:id="@+id/resulationTV"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="30dp"
+                        android:background="@drawable/rounded_corner_background"
+                        android:clickable="true"
+                        android:foreground="?attr/selectableItemBackground"
+                        android:gravity="center"
+                        android:paddingStart="8dp"
+                        android:paddingTop="4dp"
+                        android:paddingEnd="8dp"
+                        android:paddingBottom="4dp"
+                        android:text="720P"
+                        android:textColor="@color/white"
+                        android:textSize="14sp" />
+
 
                 </LinearLayout>
 
@@ -164,22 +184,22 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
-                app:layout_constraintVertical_bias="0.66" />
+                app:layout_constraintVertical_bias="0.82" />
 
             <LinearLayout
                 android:id="@+id/linearLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|end"
-                android:layout_marginTop="8dp"
+                android:layout_marginEnd="28dp"
                 android:gravity="center_vertical"
                 android:layoutDirection="ltr"
                 android:orientation="horizontal"
-                android:paddingEnd="28dp"
+                android:paddingEnd="0dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/timeBar"
-                app:layout_constraintVertical_bias="0.0">
+                app:layout_constraintVertical_bias="0.41000003">
 
                 <ImageButton
                     android:id="@+id/clocBackward"
@@ -204,14 +224,14 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:background="@android:color/transparent"
+                android:background="@color/transparent"
                 android:clipToPadding="false"
                 android:gravity="center"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintVertical_bias="0.35000002">
+                app:layout_constraintVertical_bias="0.45">
 
                 <ImageButton
                     android:id="@+id/prevBTN"
@@ -228,7 +248,7 @@
                     android:id="@+id/replayBTN"
                     android:layout_width="36dp"
                     android:layout_height="36dp"
-                    android:layout_marginStart="36dp"
+                    android:layout_marginStart="74dp"
                     android:background="@drawable/baseline_replay_5_24"
                     android:foreground="?attr/selectableItemBackground"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -250,7 +270,7 @@
                     android:id="@+id/forwardBTN"
                     android:layout_width="36dp"
                     android:layout_height="36dp"
-                    android:layout_marginEnd="36dp"
+                    android:layout_marginEnd="74dp"
                     android:background="@drawable/baseline_forward_5_24"
                     android:foreground="?attr/selectableItemBackground"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -276,8 +296,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="28dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="16dp"
                 android:background="@drawable/elipsis_circle"
                 android:foreground="?attr/selectableItemBackground"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -285,7 +303,7 @@
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/timeBar"
-                app:layout_constraintVertical_bias="0.0" />
+                app:layout_constraintVertical_bias="0.41000003" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </FrameLayout>

@@ -5,9 +5,10 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     tools:context=".TestActivity">
-    <com.splyza.media3.SplyzaVideoPlayer
+
+    <com.splyza.media.VideoPlayer
         android:id="@+id/videoPlayer"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

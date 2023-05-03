@@ -1,4 +1,4 @@
-package com.splyza.media3
+package com.splyza.media
 
 import android.annotation.SuppressLint
 import android.app.Activity
@@ -32,8 +32,9 @@ import androidx.media3.ui.TimeBar
 import kotlin.math.max
 
 
+
 @SuppressLint("ClickableViewAccessibility")
-class SplyzaVideoPlayer : ConstraintLayout {
+class VideoPlayer : ConstraintLayout {
     constructor(context: Context) : this(context, null)
 
     constructor(context: Context, attrs: AttributeSet?) : this(context, attrs, 0)

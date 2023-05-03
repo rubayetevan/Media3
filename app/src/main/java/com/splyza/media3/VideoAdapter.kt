@@ -5,6 +5,7 @@ import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.splyza.media.VideoPlayer
 import com.splyza.media3.databinding.VideoListItemBinding
 import com.squareup.picasso.Picasso
 
@@ -34,7 +35,7 @@ class VideoAdapter(private val context: Context, private val videoData: VideoDat
         Picasso.get().load(getThumbUrl(video)).into(holder.binding.thumbIMGV)
         holder.binding.root.setOnClickListener {
             val intent = Intent(context, TestActivity::class.java)
-            intent.putExtra(SplyzaVideoPlayer.KEY_VIDEO_SOURCE, video.sources[0])
+            intent.putExtra(VideoPlayer.KEY_VIDEO_SOURCE, video.sources[0])
             context.startActivity(intent)
         }
     }

@@ -20,14 +20,15 @@ class TestActivity : AppCompatActivity() {
         windowInsetsController.hide(WindowInsetsCompat.Type.navigationBars())
     }
 
-
     private lateinit var binding: ActivityTestBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         initImmersiveMode()
         binding = ActivityTestBinding.inflate(layoutInflater)
         val view = binding.root
         setContentView(view)
+
         binding.videoPlayer.onCreate(savedInstanceState, intent)
     }
 
