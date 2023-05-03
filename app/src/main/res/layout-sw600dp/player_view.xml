@@ -125,6 +125,24 @@
                         android:background="@drawable/pencil_pause"
                         android:foreground="?attr/selectableItemBackground" />
 
+                    <TextView
+                        android:id="@+id/resulationTV"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:layout_marginStart="30dp"
+                        android:background="@drawable/rounded_corner_background"
+                        android:clickable="true"
+                        android:foreground="?attr/selectableItemBackground"
+                        android:gravity="center"
+                        android:paddingStart="8dp"
+                        android:paddingTop="4dp"
+                        android:paddingEnd="8dp"
+                        android:paddingBottom="4dp"
+                        android:text="720P"
+                        android:textColor="@color/white"
+                        android:textSize="14sp" />
+
 
                 </LinearLayout>
 
