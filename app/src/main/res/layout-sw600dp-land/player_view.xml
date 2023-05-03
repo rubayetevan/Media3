@@ -146,7 +146,6 @@
                         android:layout_width="28dp"
                         android:layout_height="28dp"
                         android:layout_marginStart="30dp"
-                        android:layout_marginEnd="16dp"
                         android:background="@drawable/elipsis_circle"
                         android:foreground="?attr/selectableItemBackground"
                         app:layout_constraintBottom_toBottomOf="parent"
@@ -154,6 +153,17 @@
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/exo_bottom_bar"
                         app:layout_constraintVertical_bias="1.0" />
+
+                    <TextView
+                        android:textColor="@color/white"
+                        android:layout_gravity="center"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginStart="30dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="14sp"
+                        android:text="動画 (998/999)"
+                        />
 
 
                 </LinearLayout>
