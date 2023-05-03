@@ -193,6 +193,8 @@
                 android:id="@+id/timeBar"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/exo_styled_progress_layout_height"
+                android:paddingEnd="-2.5dp"
+                android:paddingStart="-2.5dp"
                 app:layout_constraintBottom_toTopOf="@+id/exo_bottom_bar"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

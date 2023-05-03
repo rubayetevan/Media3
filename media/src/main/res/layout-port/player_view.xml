@@ -161,11 +161,13 @@
                 android:id="@+id/timeBar"
                 android:layout_width="0dp"
                 android:layout_height="24dp"
+                android:paddingEnd="-6dp"
+                android:paddingStart="-6dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
-                app:layout_constraintVertical_bias="0.66" />
+                app:layout_constraintVertical_bias="0.64" />
 
             <LinearLayout
                 android:id="@+id/linearLayout"

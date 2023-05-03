@@ -65,6 +65,7 @@ class VideoPlayer : ConstraintLayout {
     private var positionTV: TextView
     private var durationTV: TextView
     private var progressBar: ProgressBar
+    private var plaBackSpeedTV: TextView
 
 
     private var player: ExoPlayer? = null
@@ -78,6 +79,7 @@ class VideoPlayer : ConstraintLayout {
     init {
         val rootView = LayoutInflater.from(context).inflate(R.layout.player_view, this, true)
         playerView = rootView.findViewById(R.id.playerView)
+        plaBackSpeedTV = rootView.findViewById(R.id.speedTV)
         gestureView = rootView.findViewById(R.id.gestureView)
         controllerView = rootView.findViewById(R.id.controllerView)
         fullScreenBTN = rootView.findViewById(R.id.fullscreen)
