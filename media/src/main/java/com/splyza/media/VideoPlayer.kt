@@ -159,13 +159,18 @@ class VideoPlayer : ConstraintLayout {
         )
 
         playPauseBTN.setOnClickListener {
-            if (player?.isPlaying == true) {
-                player?.pause()
-                playPauseBTN.setBackgroundResource(R.drawable.baseline_play_arrow_24)
-            } else {
-                player?.play()
-                playPauseBTN.setBackgroundResource(R.drawable.baseline_pause_24)
+
+            player?.let {
+                if (it.isPlaying) {
+                    it.pause()
+                    playPauseBTN.setBackgroundResource(R.drawable.baseline_play_arrow_24)
+                } else {
+                    it.play()
+                    playPauseBTN.setBackgroundResource(R.drawable.baseline_pause_24)
+                }
             }
+
+
         }
 
         replayBTN.setOnClickListener {
@@ -320,6 +325,12 @@ class VideoPlayer : ConstraintLayout {
                 handler?.post(updateProgressAction)
             } else {
                 handler?.removeCallbacks(updateProgressAction)
+            }
+
+            if (playbackState == Player.STATE_ENDED) {
+                playPauseBTN.setBackgroundResource(R.drawable.baseline_play_arrow_24)
+                player?.seekTo(0L)
+                player?.pause()
             }
         }
 
