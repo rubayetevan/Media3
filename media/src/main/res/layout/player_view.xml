@@ -15,14 +15,14 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <androidx.media3.ui.PlayerView
-            app:use_controller="false"
-            android:keepScreenOn="true"
             android:id="@+id/playerView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:keepScreenOn="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:use_controller="false" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -161,13 +161,14 @@
                 android:id="@+id/timeBar"
                 android:layout_width="0dp"
                 android:layout_height="24dp"
-                android:paddingEnd="-6dp"
                 android:paddingStart="-6dp"
+                android:paddingEnd="-6dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="1.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
-                app:layout_constraintVertical_bias="0.64" />
+                app:layout_constraintVertical_bias="0.643" />
 
             <LinearLayout
                 android:id="@+id/linearLayout"
@@ -284,11 +285,24 @@
                 android:background="@drawable/elipsis_circle"
                 android:foreground="?attr/selectableItemBackground"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/linearLayout"
-                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/timeBar"
                 app:layout_constraintVertical_bias="0.0" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/filterSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:text="Filter"
+                android:textColor="@color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/linearLayout"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toEndOf="@+id/menu"
+                app:layout_constraintTop_toBottomOf="@+id/exo_bottom_bar"
+                app:layout_constraintVertical_bias="0.86" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </FrameLayout>

@@ -16,9 +16,9 @@
 
         <androidx.media3.ui.PlayerView
             android:id="@+id/playerView"
-            android:keepScreenOn="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:keepScreenOn="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -180,8 +180,8 @@
                 android:id="@+id/timeBar"
                 android:layout_width="0dp"
                 android:layout_height="24dp"
-                android:paddingEnd="-6dp"
                 android:paddingStart="-6dp"
+                android:paddingEnd="-6dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -306,6 +306,22 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/timeBar"
                 app:layout_constraintVertical_bias="0.41000003" />
+
+            <com.google.android.material.switchmaterial.SwitchMaterial
+                android:id="@+id/filterSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
+                android:switchPadding="5dp"
+                android:text="Filter"
+                android:textColor="@color/white"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/linearLayout"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toEndOf="@+id/menu"
+                app:layout_constraintTop_toBottomOf="@+id/exo_bottom_bar"
+                app:layout_constraintVertical_bias="0.86" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </FrameLayout>
