@@ -2,6 +2,7 @@ package com.splyza.media
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
@@ -32,7 +33,6 @@ import androidx.media3.ui.TimeBar
 import kotlin.math.max
 
 
-
 @SuppressLint("ClickableViewAccessibility")
 class VideoPlayer : ConstraintLayout {
     constructor(context: Context) : this(context, null)
@@ -49,6 +49,18 @@ class VideoPlayer : ConstraintLayout {
         const val KEY_VIDEO_SOURCE = "videoSource"
         const val KEY_POSITION = "position"
         const val KEY_AUTO_PLAY = "auto_play"
+        const val KEY_PLAYBACK_SPEED = "playback_speed"
+
+        private val speedMap: MutableMap<String, Float> = mutableMapOf(
+            "x4" to 4f,
+            "x2" to 2f,
+            "x1.5" to 1.5f,
+            "x1" to 1f,
+            "x1/2" to 1 / 2f,
+            "x1/4" to 1 / 4f,
+            "x1/8" to 1 / 8f,
+            "x1/16" to 1 / 16f
+        )
     }
 
     private val activity: Activity = context as Activity
@@ -71,10 +83,12 @@ class VideoPlayer : ConstraintLayout {
     private var player: ExoPlayer? = null
     private var startAutoPlay = false
     private var startPosition: Long = 0
+    private var playBackSpeed: String = "x1"
 
     private var handler: Handler? = null
     private var isScrubbing = false
     private var intent: Intent? = null
+    private var dialog: AlertDialog
 
     init {
         val rootView = LayoutInflater.from(context).inflate(R.layout.player_view, this, true)
@@ -91,7 +105,18 @@ class VideoPlayer : ConstraintLayout {
         positionTV = rootView.findViewById(R.id.position)
         durationTV = rootView.findViewById(R.id.duration)
         progressBar = rootView.findViewById(R.id.progressBar)
+
+        val builder = AlertDialog.Builder(context)
+        builder.setTitle("Change Speed")
+        val speedList = speedMap.keys.toTypedArray()
+        builder.setItems(speedList) { dialog, which ->
+            playBackSpeed = speedList[which]
+            plaBackSpeedTV.text = playBackSpeed
+            speedMap[playBackSpeed]?.let { player?.setPlaybackSpeed(it) }
+        }
+        dialog = builder.create()
     }
+
 
     @SuppressLint("ClickableViewAccessibility")
     fun onCreate(savedInstanceState: Bundle?, intent: Intent?) {
@@ -101,7 +126,7 @@ class VideoPlayer : ConstraintLayout {
         hideController()
         gestureView.setOnTouchListener { _, motionEvent ->
             scaleGestureDetector.onTouchEvent(motionEvent)
-            if(!controllerView.isVisible) {
+            if (!controllerView.isVisible) {
                 controllerView.visibility = View.VISIBLE
                 hideController()
             }
@@ -111,6 +136,7 @@ class VideoPlayer : ConstraintLayout {
         savedInstanceState?.let {
             startAutoPlay = it.getBoolean(KEY_AUTO_PLAY)
             startPosition = it.getLong(KEY_POSITION)
+            playBackSpeed = it.getString(KEY_PLAYBACK_SPEED, "x1")
         } ?: run {
             clearStartPosition()
         }
@@ -162,6 +188,10 @@ class VideoPlayer : ConstraintLayout {
         closeBTN.setOnClickListener {
             activity.finish()
         }
+
+        plaBackSpeedTV.setOnClickListener {
+            dialog.show()
+        }
     }
 
     private fun hideController() {
@@ -173,7 +203,7 @@ class VideoPlayer : ConstraintLayout {
     @Suppress("unused")
     fun onNewIntent(intent: Intent?) {
         this.intent = intent
-        Log.d(TAG,"onNewIntent::intent =$intent")
+        Log.d(TAG, "onNewIntent::intent =$intent")
         releasePlayer()
         clearStartPosition()
     }
@@ -198,6 +228,7 @@ class VideoPlayer : ConstraintLayout {
     private fun clearStartPosition() {
         startAutoPlay = true
         startPosition = C.TIME_UNSET
+        playBackSpeed = "x1"
     }
 
     fun onStart() {
@@ -221,6 +252,7 @@ class VideoPlayer : ConstraintLayout {
         updateStartPosition()
         outState.putBoolean(KEY_AUTO_PLAY, startAutoPlay)
         outState.putLong(KEY_POSITION, startPosition)
+        outState.putString(KEY_PLAYBACK_SPEED, playBackSpeed)
     }
 
     @SuppressLint("UnsafeOptInUsageError")
@@ -254,6 +286,11 @@ class VideoPlayer : ConstraintLayout {
             playPauseBTN.setBackgroundResource(R.drawable.baseline_pause_24)
         } else {
             playPauseBTN.setBackgroundResource(R.drawable.baseline_play_arrow_24)
+        }
+
+        if (playBackSpeed != "x1") {
+            plaBackSpeedTV.text = playBackSpeed
+            speedMap[playBackSpeed]?.let { player?.setPlaybackSpeed(it) }
         }
 
         return true
