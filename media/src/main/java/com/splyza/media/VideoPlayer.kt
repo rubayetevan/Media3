@@ -326,4 +326,9 @@ class VideoPlayer : ConstraintLayout {
         }
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        requestLayout()
+    }
+
 }
