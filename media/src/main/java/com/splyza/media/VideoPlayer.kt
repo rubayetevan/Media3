@@ -9,6 +9,7 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
@@ -16,9 +17,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.ScaleGestureDetector
 import android.view.View
-import android.widget.ImageButton
-import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.media3.common.AudioAttributes
@@ -28,8 +26,8 @@ import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.util.EventLogger
-import androidx.media3.ui.PlayerView
 import androidx.media3.ui.TimeBar
+import com.splyza.media.databinding.PlayerViewBinding
 import kotlin.math.max
 
 
@@ -62,78 +60,41 @@ class VideoPlayer : ConstraintLayout {
             "x1/8" to 1 / 8f,
             "x1/16" to 1 / 16f
         )
+
+        private var duration = 15000L
+        const val INTERVAL = 1L
     }
 
     private val activity: Activity = context as Activity
     private lateinit var scaleGestureDetector: ScaleGestureDetector
-    private var gestureView: View
-    private var controllerView: View
-    private var playerView: PlayerView
-    private var fullScreenBTN: ImageButton
-    private var playPauseBTN: ImageButton
-    private var replayBTN: ImageButton
-    private var forwardBTN: ImageButton
-    private var closeBTN: ImageButton
-    private var timeBar: TimeBar
-    private var positionTV: TextView
-    private var durationTV: TextView
-    private var progressBar: ProgressBar
-    private var plaBackSpeedTV: TextView
-
 
     private var player: ExoPlayer? = null
     private var startAutoPlay = false
     private var startPosition: Long = 0
     private var playBackSpeed: String = "x1"
-
     private var handler: Handler? = null
     private var isScrubbing = false
     private var intent: Intent? = null
-    private var dialog: AlertDialog
 
-    init {
-        val rootView = LayoutInflater.from(context).inflate(R.layout.player_view, this, true)
-        playerView = rootView.findViewById(R.id.playerView)
-        plaBackSpeedTV = rootView.findViewById(R.id.speedTV)
-        gestureView = rootView.findViewById(R.id.gestureView)
-        controllerView = rootView.findViewById(R.id.controllerView)
-        fullScreenBTN = rootView.findViewById(R.id.fullscreen)
-        playPauseBTN = rootView.findViewById(R.id.playPauseBtn)
-        replayBTN = rootView.findViewById(R.id.replayBTN)
-        forwardBTN = rootView.findViewById(R.id.forwardBTN)
-        closeBTN = rootView.findViewById(R.id.close)
-        timeBar = rootView.findViewById(R.id.timeBar)
-        positionTV = rootView.findViewById(R.id.position)
-        durationTV = rootView.findViewById(R.id.duration)
-        progressBar = rootView.findViewById(R.id.progressBar)
-
-        val builder = AlertDialog.Builder(context)
-        builder.setTitle("Change Speed")
-        val speedList = speedMap.keys.toTypedArray()
-        builder.setItems(speedList) { dialog, which ->
-            playBackSpeed = speedList[which]
-            plaBackSpeedTV.text = playBackSpeed
-            speedMap[playBackSpeed]?.let { player?.setPlaybackSpeed(it) }
-        }
-        dialog = builder.create()
-    }
+    private val binding: PlayerViewBinding =
+        PlayerViewBinding.inflate(LayoutInflater.from(context), this, true)
 
 
     @SuppressLint("ClickableViewAccessibility")
     fun onCreate(savedInstanceState: Bundle?, intent: Intent?) {
         this.intent = intent
-        playerView.setErrorMessageProvider(PlayerErrorMessageProvider())
-        playerView.requestFocus()
+        binding.playerView.setErrorMessageProvider(PlayerErrorMessageProvider())
+        binding.playerView.requestFocus()
         hideController()
-        gestureView.setOnTouchListener { _, motionEvent ->
+        binding.gestureView.setOnTouchListener { _, motionEvent ->
             scaleGestureDetector.onTouchEvent(motionEvent)
-            if (!controllerView.isVisible) {
-                controllerView.visibility = View.VISIBLE
+            if (!binding.controllerView.isVisible) {
+                binding.controllerView.visibility = View.VISIBLE
                 hideController()
             }
             true
         }
-        val scaleGestureListener = ScaleGestureListener(playerView)
+        val scaleGestureListener = ScaleGestureListener(binding.playerView)
 
         savedInstanceState?.let {
             startAutoPlay = it.getBoolean(KEY_AUTO_PLAY)
@@ -149,7 +110,17 @@ class VideoPlayer : ConstraintLayout {
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     private fun setupPlayerController(scaleGestureListener: ScaleGestureListener) {
-        fullScreenBTN.setOnClickListener {
+        val playBackSpeedAlertDialogBuilder = AlertDialog.Builder(context)
+        playBackSpeedAlertDialogBuilder.setTitle("Change Speed")
+        val speedList = speedMap.keys.toTypedArray()
+        playBackSpeedAlertDialogBuilder.setItems(speedList) { dialog, which ->
+            playBackSpeed = speedList[which]
+            binding.speedTV.text = playBackSpeed
+            speedMap[playBackSpeed]?.let { player?.setPlaybackSpeed(it) }
+        }
+        val playBackSpeedAlertDialog = playBackSpeedAlertDialogBuilder.create()
+
+        binding.fullscreen.setOnClickListener {
             val currentOrientation = resources.configuration.orientation
             activity.requestedOrientation =
                 if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
@@ -163,20 +134,15 @@ class VideoPlayer : ConstraintLayout {
             context, scaleGestureListener
         )
 
-        playPauseBTN.setOnClickListener {
+        binding.playPauseBtn.setOnClickListener {
 
             player?.let {
-                it.playWhenReady=!it.playWhenReady
-                if (it.playWhenReady) {
-                    playPauseBTN.setBackgroundResource(R.drawable.baseline_pause_24)
-                } else {
-                    playPauseBTN.setBackgroundResource(R.drawable.baseline_play_arrow_24)
-                }
+                playPause()
             }
 
         }
 
-        replayBTN.setOnClickListener {
+        binding.replayBTN.setOnClickListener {
 
             player?.let {
                 if (it.contentPosition >= 5000L) {
@@ -185,7 +151,7 @@ class VideoPlayer : ConstraintLayout {
             }
         }
 
-        forwardBTN.setOnClickListener {
+        binding.forwardBTN.setOnClickListener {
             player?.let {
                 if (it.contentPosition <= it.duration - 5000L) {
                     it.seekTo(it.contentPosition + 5000L)
@@ -193,18 +159,33 @@ class VideoPlayer : ConstraintLayout {
             }
         }
 
-        closeBTN.setOnClickListener {
+        binding.close.setOnClickListener {
             activity.finish()
         }
 
-        plaBackSpeedTV.setOnClickListener {
-            dialog.show()
+        binding.speedTV.setOnClickListener {
+            playBackSpeedAlertDialog.show()
+        }
+
+        binding.pauseEditBtn.setOnClickListener {
+            timer.start()
+        }
+    }
+
+    private fun playPause() {
+        player?.let {
+            it.playWhenReady = !it.playWhenReady
+            if (it.playWhenReady) {
+                binding.playPauseBtn.setBackgroundResource(R.drawable.baseline_pause_24)
+            } else {
+                binding.playPauseBtn.setBackgroundResource(R.drawable.baseline_play_arrow_24)
+            }
         }
     }
 
     private fun hideController() {
-        controllerView.postDelayed({
-            controllerView.visibility = View.INVISIBLE
+        binding.controllerView.postDelayed({
+            binding.controllerView.visibility = View.INVISIBLE
         }, CONTROLLER_HIDE_TIMEOUT_MS)
     }
 
@@ -221,7 +202,7 @@ class VideoPlayer : ConstraintLayout {
             updateStartPosition()
             it.release()
             player = null
-            playerView.player = null
+            binding.playerView.player = null
         }
         handler?.removeCallbacks(updateProgressAction)
     }
@@ -241,18 +222,18 @@ class VideoPlayer : ConstraintLayout {
 
     fun onStart() {
         initializePlayer()
-        playerView.onResume()
+        binding.playerView.onResume()
     }
 
     fun onResume() {
         if (player == null) {
             initializePlayer()
-            playerView.onResume()
+            binding.playerView.onResume()
         }
     }
 
     fun onStop() {
-        playerView.onPause()
+        binding.playerView.onPause()
         releasePlayer()
     }
 
@@ -283,8 +264,8 @@ class VideoPlayer : ConstraintLayout {
             player?.addAnalyticsListener(EventLogger())
             player?.setAudioAttributes(AudioAttributes.DEFAULT, true)
             player?.playWhenReady = startAutoPlay
-            playerView.player = player
-            timeBar.addListener(playerSeekBarListener)
+            binding.playerView.player = player
+            binding.timeBar.addListener(playerSeekBarListener)
         }
         player?.setMediaItem(mediaItem)
         player?.prepare()
@@ -293,7 +274,7 @@ class VideoPlayer : ConstraintLayout {
         }
 
         if (playBackSpeed != "x1") {
-            plaBackSpeedTV.text = playBackSpeed
+            binding.speedTV.text = playBackSpeed
             speedMap[playBackSpeed]?.let { player?.setPlaybackSpeed(it) }
         }
 
@@ -305,8 +286,8 @@ class VideoPlayer : ConstraintLayout {
         override fun run() {
             if (!isScrubbing) {
                 player?.let {
-                    positionTV.text = getPlayerTime(it.currentPosition)
-                    timeBar.setPosition(it.contentPosition)
+                    binding.position.text = getPlayerTime(it.currentPosition)
+                    binding.timeBar.setPosition(it.contentPosition)
                 }
             }
             handler?.post(this)
@@ -318,8 +299,8 @@ class VideoPlayer : ConstraintLayout {
         override fun onPlaybackStateChanged(playbackState: Int) {
             if (playbackState == Player.STATE_READY) {
                 player?.duration?.let {
-                    timeBar.setDuration(it)
-                    durationTV.text = getPlayerTime(it)
+                    binding.timeBar.setDuration(it)
+                    binding.duration.text = getPlayerTime(it)
                 }
                 handler?.post(updateProgressAction)
             } else {
@@ -327,24 +308,23 @@ class VideoPlayer : ConstraintLayout {
             }
 
             if (playbackState == Player.STATE_ENDED) {
-                playPauseBTN.setBackgroundResource(R.drawable.baseline_play_arrow_24)
+                player?.playWhenReady = false
                 player?.seekTo(0L)
-                player?.playWhenReady=false
             }
 
-            if (player?.playWhenReady==true) {
-                playPauseBTN.setBackgroundResource(R.drawable.baseline_pause_24)
+            if (player?.playWhenReady == true) {
+                binding.playPauseBtn.setBackgroundResource(R.drawable.baseline_pause_24)
             } else {
-                playPauseBTN.setBackgroundResource(R.drawable.baseline_play_arrow_24)
+                binding.playPauseBtn.setBackgroundResource(R.drawable.baseline_play_arrow_24)
             }
         }
 
         override fun onIsLoadingChanged(isLoading: Boolean) {
             super.onIsLoadingChanged(isLoading)
             if (isLoading) {
-                progressBar.visibility = View.VISIBLE
+                binding.progressBar.visibility = View.VISIBLE
             } else {
-                progressBar.visibility = View.GONE
+                binding.progressBar.visibility = View.GONE
             }
         }
     }
@@ -383,5 +363,18 @@ class VideoPlayer : ConstraintLayout {
         super.onConfigurationChanged(newConfig)
         requestLayout()
     }
+
+
+    private val timer = object : CountDownTimer(duration, INTERVAL) {
+        override fun onTick(millisUntilFinished: Long) {
+            val progress = 100 - (millisUntilFinished / duration.toDouble() * 100).toInt()
+            binding.pauseProgressBar.progress = progress
+        }
+
+        override fun onFinish() {
+            binding.pauseProgressBar.progress = 100
+        }
+    }
+
 
 }

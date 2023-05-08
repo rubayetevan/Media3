@@ -17,7 +17,7 @@
         <androidx.media3.ui.PlayerView
             android:id="@+id/playerView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="768dp"
             android:keepScreenOn="true"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -51,6 +51,18 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="horizontal">
+
+            <ProgressBar
+                android:progress="0"
+                android:max="100"
+                android:id="@+id/pauseProgressBar"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                app:layout_constraintBottom_toTopOf="@+id/close"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ProgressBar
                 android:id="@+id/progressBar"
@@ -321,7 +333,7 @@
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toEndOf="@+id/menu"
                 app:layout_constraintTop_toBottomOf="@+id/exo_bottom_bar"
-                app:layout_constraintVertical_bias="0.86" />
+                app:layout_constraintVertical_bias="0.65" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </FrameLayout>
