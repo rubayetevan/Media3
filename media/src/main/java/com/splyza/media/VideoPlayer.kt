@@ -50,6 +50,7 @@ class VideoPlayer : ConstraintLayout {
         const val KEY_POSITION = "position"
         const val KEY_AUTO_PLAY = "auto_play"
         const val KEY_PLAYBACK_SPEED = "playback_speed"
+        const val KEY_SCALE_FACTOR = "scale_factor"
 
         private val speedMap: MutableMap<String, Float> = mutableMapOf(
             "x4" to 4f,
@@ -132,19 +133,22 @@ class VideoPlayer : ConstraintLayout {
             }
             true
         }
+        val scaleGestureListener = ScaleGestureListener(playerView)
 
         savedInstanceState?.let {
             startAutoPlay = it.getBoolean(KEY_AUTO_PLAY)
             startPosition = it.getLong(KEY_POSITION)
             playBackSpeed = it.getString(KEY_PLAYBACK_SPEED, "x1")
+            scaleGestureListener.setScaleFactor(it.getFloat(KEY_SCALE_FACTOR))
+
         } ?: run {
             clearStartPosition()
         }
-        setupPlayerController()
+        setupPlayerController(scaleGestureListener)
     }
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-    private fun setupPlayerController() {
+    private fun setupPlayerController(scaleGestureListener: ScaleGestureListener) {
         fullScreenBTN.setOnClickListener {
             val currentOrientation = resources.configuration.orientation
             activity.requestedOrientation =
@@ -154,8 +158,9 @@ class VideoPlayer : ConstraintLayout {
                     ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
                 }
         }
+
         scaleGestureDetector = ScaleGestureDetector(
-            activity, ScaleGestureListener(playerView)
+            context, scaleGestureListener
         )
 
         playPauseBTN.setOnClickListener {
@@ -258,6 +263,7 @@ class VideoPlayer : ConstraintLayout {
         outState.putBoolean(KEY_AUTO_PLAY, startAutoPlay)
         outState.putLong(KEY_POSITION, startPosition)
         outState.putString(KEY_PLAYBACK_SPEED, playBackSpeed)
+        outState.putFloat(KEY_SCALE_FACTOR, ScaleGestureListener.scaleFactor)
     }
 
     @SuppressLint("UnsafeOptInUsageError")

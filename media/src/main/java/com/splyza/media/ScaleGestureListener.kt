@@ -1,7 +1,6 @@
 package com.splyza.media
 
 
-import android.util.Log
 import android.view.ScaleGestureDetector
 import androidx.media3.ui.PlayerView
 import kotlin.math.max
@@ -13,36 +12,32 @@ class ScaleGestureListener(
 
     companion object {
         private const val TAG = "ScaleGestureListener"
+        private const val MIN_SCALE_FACTOR = 0.1f
+        private const val MAX_SCALE_FACTOR = 10f
+        var scaleFactor = 1f
+            private set
     }
 
-    private var scaleFactor = 1f
+    private val initialScaleX = playerView.scaleX
+    private val initialScaleY = playerView.scaleY
 
     override fun onScale(
         detector: ScaleGestureDetector
     ): Boolean {
         scaleFactor *= detector.scaleFactor
-        scaleFactor = max(0.1f, min(scaleFactor, 10.0f))
-        if (scaleFactor > 1) {
-            playerView.scaleX = scaleFactor
-            playerView.scaleY = scaleFactor
+        scaleFactor = max(MIN_SCALE_FACTOR, min(scaleFactor, MAX_SCALE_FACTOR))
+        setScaleFactor(scaleFactor)
+        return true
+    }
+
+    fun setScaleFactor(factor: Float?) {
+        factor?.let {
+            scaleFactor = it
+            if (scaleFactor > 1) {
+                playerView.scaleX = initialScaleX * scaleFactor
+                playerView.scaleY = initialScaleY * scaleFactor
+            }
         }
-        return true
     }
 
-    override fun onScaleBegin(
-        detector: ScaleGestureDetector
-    ): Boolean {
-        return true
-    }
-
-    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
-    override fun onScaleEnd(detector: ScaleGestureDetector) {
-        Log.d(TAG, "detector.scaleFactor = ${detector.scaleFactor}")
-        /*if (scaleFactor > 1) {
-            playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
-        } else {
-            playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-        }*/
-
-    }
 }
