@@ -166,15 +166,13 @@ class VideoPlayer : ConstraintLayout {
         playPauseBTN.setOnClickListener {
 
             player?.let {
-                if (it.isPlaying) {
-                    it.pause()
-                    playPauseBTN.setBackgroundResource(R.drawable.baseline_play_arrow_24)
-                } else {
-                    it.play()
+                it.playWhenReady=!it.playWhenReady
+                if (it.playWhenReady) {
                     playPauseBTN.setBackgroundResource(R.drawable.baseline_pause_24)
+                } else {
+                    playPauseBTN.setBackgroundResource(R.drawable.baseline_play_arrow_24)
                 }
             }
-
 
         }
 
@@ -293,11 +291,6 @@ class VideoPlayer : ConstraintLayout {
         if (startPosition != C.TIME_UNSET) {
             player?.seekTo(startPosition)
         }
-        if (startAutoPlay) {
-            playPauseBTN.setBackgroundResource(R.drawable.baseline_pause_24)
-        } else {
-            playPauseBTN.setBackgroundResource(R.drawable.baseline_play_arrow_24)
-        }
 
         if (playBackSpeed != "x1") {
             plaBackSpeedTV.text = playBackSpeed
@@ -336,7 +329,13 @@ class VideoPlayer : ConstraintLayout {
             if (playbackState == Player.STATE_ENDED) {
                 playPauseBTN.setBackgroundResource(R.drawable.baseline_play_arrow_24)
                 player?.seekTo(0L)
-                player?.pause()
+                player?.playWhenReady=false
+            }
+
+            if (player?.playWhenReady==true) {
+                playPauseBTN.setBackgroundResource(R.drawable.baseline_pause_24)
+            } else {
+                playPauseBTN.setBackgroundResource(R.drawable.baseline_play_arrow_24)
             }
         }
 
