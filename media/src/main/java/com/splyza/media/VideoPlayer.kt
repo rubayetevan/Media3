@@ -15,6 +15,7 @@ import android.os.Looper
 import android.util.AttributeSet
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -27,6 +28,8 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.util.EventLogger
 import androidx.media3.ui.TimeBar
+import androidx.transition.AutoTransition
+import androidx.transition.TransitionManager
 import com.splyza.media.databinding.PlayerViewBinding
 import kotlin.math.max
 
@@ -42,7 +45,7 @@ class VideoPlayer : ConstraintLayout {
     )
 
     companion object {
-        private const val TAG = "SplyzaVideoPlayer"
+        private const val TAG = "VideoPlayer"
         private const val CONTROLLER_HIDE_TIMEOUT_MS = 5000L
         const val KEY_VIDEO_SOURCE = "videoSource"
         const val KEY_POSITION = "position"
@@ -85,15 +88,7 @@ class VideoPlayer : ConstraintLayout {
         this.intent = intent
         binding.playerView.setErrorMessageProvider(PlayerErrorMessageProvider())
         binding.playerView.requestFocus()
-        hideController()
-        binding.gestureView.setOnTouchListener { _, motionEvent ->
-            scaleGestureDetector.onTouchEvent(motionEvent)
-            if (!binding.controllerView.isVisible) {
-                binding.controllerView.visibility = View.VISIBLE
-                hideController()
-            }
-            true
-        }
+
         val scaleGestureListener = ScaleGestureListener(binding.playerView)
 
         savedInstanceState?.let {
@@ -110,6 +105,11 @@ class VideoPlayer : ConstraintLayout {
 
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     private fun setupPlayerController(scaleGestureListener: ScaleGestureListener) {
+
+        scaleGestureDetector = ScaleGestureDetector(
+            context, scaleGestureListener
+        )
+
         val playBackSpeedAlertDialogBuilder = AlertDialog.Builder(context)
         playBackSpeedAlertDialogBuilder.setTitle("Change Speed")
         val speedList = speedMap.keys.toTypedArray()
@@ -119,6 +119,27 @@ class VideoPlayer : ConstraintLayout {
             speedMap[playBackSpeed]?.let { player?.setPlaybackSpeed(it) }
         }
         val playBackSpeedAlertDialog = playBackSpeedAlertDialogBuilder.create()
+
+        binding.gestureView.setOnTouchListener { _, motionEvent ->
+            when (motionEvent.action) {
+                MotionEvent.ACTION_MOVE -> {
+                    scaleGestureDetector.onTouchEvent(motionEvent)
+                }
+
+                MotionEvent.ACTION_DOWN -> {
+                    TransitionManager.beginDelayedTransition(
+                        binding.controllerView,
+                        AutoTransition()
+                    )
+                    binding.controllerView.visibility = if (binding.controllerView.isVisible) {
+                        View.GONE
+                    } else {
+                        View.VISIBLE
+                    }
+                }
+            }
+            true
+        }
 
         binding.fullscreen.setOnClickListener {
             val currentOrientation = resources.configuration.orientation
@@ -130,9 +151,7 @@ class VideoPlayer : ConstraintLayout {
                 }
         }
 
-        scaleGestureDetector = ScaleGestureDetector(
-            context, scaleGestureListener
-        )
+
 
         binding.playPauseBtn.setOnClickListener {
 
