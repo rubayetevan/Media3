@@ -204,10 +204,18 @@ class VideoPlayer : ConstraintLayout {
     private fun playPause() {
         player?.let {
             it.playWhenReady = !it.playWhenReady
-            if (it.playWhenReady) {
-                binding.playPauseBtn.setBackgroundResource(R.drawable.baseline_pause_24)
-            } else {
-                binding.playPauseBtn.setBackgroundResource(R.drawable.baseline_play_arrow_24)
+            changePlayPauseIcon()
+        }
+    }
+
+    private fun changePlayPauseIcon() {
+        player?.let {
+            binding.playPauseBtn.apply {
+                if (it.playWhenReady) {
+                    setBackgroundResource(R.drawable.baseline_pause_24)
+                } else {
+                    setBackgroundResource(R.drawable.baseline_play_arrow_24)
+                }
             }
         }
     }
@@ -341,11 +349,7 @@ class VideoPlayer : ConstraintLayout {
                 player?.seekTo(0L)
             }
 
-            if (player?.playWhenReady == true) {
-                binding.playPauseBtn.setBackgroundResource(R.drawable.baseline_pause_24)
-            } else {
-                binding.playPauseBtn.setBackgroundResource(R.drawable.baseline_play_arrow_24)
-            }
+            changePlayPauseIcon()
         }
 
         override fun onIsLoadingChanged(isLoading: Boolean) {
@@ -400,6 +404,8 @@ class VideoPlayer : ConstraintLayout {
                 progress = (millisUntilFinished / duration.toDouble() * 100).toInt()
                 if (!isVisible) visibility = View.VISIBLE
             }
+            player?.playWhenReady = false
+            changePlayPauseIcon()
         }
 
         override fun onFinish() {
@@ -407,6 +413,8 @@ class VideoPlayer : ConstraintLayout {
                 progress = 0
                 if (isVisible) visibility = View.GONE
             }
+            player?.playWhenReady = true
+            changePlayPauseIcon()
         }
     }
 
