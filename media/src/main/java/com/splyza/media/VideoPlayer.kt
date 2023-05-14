@@ -6,7 +6,9 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.content.res.ColorStateList
 import android.content.res.Configuration
+import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -82,6 +84,13 @@ class VideoPlayer : ConstraintLayout {
     private val binding: PlayerViewBinding =
         PlayerViewBinding.inflate(LayoutInflater.from(context), this, true)
 
+    init {
+        binding.pauseProgressBar.apply {
+            progressTintList = ColorStateList.valueOf(Color.WHITE)
+            visibility = View.GONE
+        }
+    }
+
 
     @SuppressLint("ClickableViewAccessibility")
     fun onCreate(savedInstanceState: Bundle?, intent: Intent?) {
@@ -127,14 +136,15 @@ class VideoPlayer : ConstraintLayout {
                 }
 
                 MotionEvent.ACTION_DOWN -> {
-                    TransitionManager.beginDelayedTransition(
-                        binding.controllerView,
-                        AutoTransition()
-                    )
-                    binding.controllerView.visibility = if (binding.controllerView.isVisible) {
-                        View.GONE
-                    } else {
-                        View.VISIBLE
+                    binding.controllerView.apply {
+                        TransitionManager.beginDelayedTransition(
+                            this, AutoTransition()
+                        )
+                        visibility = if (isVisible) {
+                            View.GONE
+                        } else {
+                            View.VISIBLE
+                        }
                     }
                 }
             }
@@ -386,12 +396,17 @@ class VideoPlayer : ConstraintLayout {
 
     private val timer = object : CountDownTimer(duration, INTERVAL) {
         override fun onTick(millisUntilFinished: Long) {
-            val progress = 100 - (millisUntilFinished / duration.toDouble() * 100).toInt()
-            binding.pauseProgressBar.progress = progress
+            binding.pauseProgressBar.apply {
+                progress = (millisUntilFinished / duration.toDouble() * 100).toInt()
+                if (!isVisible) visibility = View.VISIBLE
+            }
         }
 
         override fun onFinish() {
-            binding.pauseProgressBar.progress = 100
+            binding.pauseProgressBar.apply {
+                progress = 0
+                if (isVisible) visibility = View.GONE
+            }
         }
     }
 

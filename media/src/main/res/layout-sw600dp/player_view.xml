@@ -46,6 +46,15 @@
         app:layout_constraintStart_toStartOf="@+id/playerHolderCL"
         app:layout_constraintTop_toTopOf="@+id/playerHolderCL">
 
+
+        <ProgressBar
+            android:progress="100"
+            android:max="100"
+            android:id="@+id/pauseProgressBar"
+            style="?android:attr/progressBarStyleHorizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/controllerView"
             android:background="#40000000"
@@ -53,17 +62,6 @@
             android:layout_height="match_parent"
             android:orientation="horizontal">
 
-            <ProgressBar
-                android:progress="0"
-                android:max="100"
-                android:id="@+id/pauseProgressBar"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                app:layout_constraintBottom_toTopOf="@+id/close"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
 
             <ProgressBar
                 android:id="@+id/progressBar"
