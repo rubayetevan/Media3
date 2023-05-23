@@ -20,6 +20,7 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.view.View
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.media3.common.AudioAttributes
@@ -81,8 +82,14 @@ class VideoPlayer : ConstraintLayout {
     private var isScrubbing = false
     private var intent: Intent? = null
 
+    private var pauseEditEnabled: Boolean = false
+    private val autoPauseTimes = mutableListOf<Int>(7, 10, 12)
+
     private val binding: PlayerViewBinding =
         PlayerViewBinding.inflate(LayoutInflater.from(context), this, true)
+
+    val pencilPauseDrawable = AppCompatResources.getDrawable(context, R.drawable.pencil_pause)
+    val pencilPauseInactiveDrawable = AppCompatResources.getDrawable(context, R.drawable.pencil_pause_inactive)
 
     init {
         binding.pauseProgressBar.apply {
@@ -196,8 +203,29 @@ class VideoPlayer : ConstraintLayout {
             playBackSpeedAlertDialog.show()
         }
 
+        var index = 0
+
         binding.pauseEditBtn.setOnClickListener {
-            timer.start()
+            if (!pauseEditEnabled) {
+                it.background = pencilPauseDrawable
+                pauseEditEnabled = true
+            } else if (pauseEditEnabled) {
+
+                timer.start()
+
+                if (autoPauseTimes.isNotEmpty() && index < autoPauseTimes.size) {
+                    binding.pauseTimeTV.visibility = View.VISIBLE
+                    binding.pauseTimeTV.text = autoPauseTimes[index].toString()
+                    index++
+                } else {
+                    binding.pauseTimeTV.visibility = View.GONE
+                    index = 0
+                    pauseEditEnabled = false
+                    it.background = pencilPauseInactiveDrawable
+
+                }
+            }
+
         }
     }
 

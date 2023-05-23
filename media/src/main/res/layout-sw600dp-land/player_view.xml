@@ -176,7 +176,16 @@
                         android:text="動画 (998/999)"
                         android:textColor="@color/white"
                         android:textSize="14sp" />
-
+                    <TextView
+                        android:id="@+id/pauseTimeTV"
+                        android:layout_marginStart="3dp"
+                        android:text="16"
+                        android:textColor="@color/white"
+                        android:visibility="gone"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginEnd="16dp"
+                        />
 
                 </LinearLayout>
 
