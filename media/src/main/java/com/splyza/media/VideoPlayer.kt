@@ -34,6 +34,8 @@ import androidx.media3.ui.TimeBar
 import androidx.transition.AutoTransition
 import androidx.transition.TransitionManager
 import com.splyza.media.databinding.PlayerViewBinding
+import java.util.TreeSet
+import kotlin.math.abs
 import kotlin.math.max
 
 
@@ -49,7 +51,6 @@ class VideoPlayer : ConstraintLayout {
 
     companion object {
         private const val TAG = "VideoPlayer"
-        private const val CONTROLLER_HIDE_TIMEOUT_MS = 5000L
         const val KEY_VIDEO_SOURCE = "videoSource"
         const val KEY_POSITION = "position"
         const val KEY_AUTO_PLAY = "auto_play"
@@ -100,7 +101,7 @@ class VideoPlayer : ConstraintLayout {
     private var tagTimes = sortedSetOf<Long>()
 
     private var timer: CountDownTimer? = null
-    private var currentTagTime: Long = -C.TIME_UNSET
+    private var currentTagTime: Long = Long.MAX_VALUE
     private var tagTimeIndex = 0
     private var autoPauseIntervalIndex = 0
 
@@ -325,12 +326,6 @@ class VideoPlayer : ConstraintLayout {
         }
     }
 
-    private fun hideController() {
-        binding.controllerView.postDelayed({
-            binding.controllerView.visibility = View.INVISIBLE
-        }, CONTROLLER_HIDE_TIMEOUT_MS)
-    }
-
     @Suppress("unused")
     fun onNewIntent(intent: Intent?) {
         this.intent = intent
@@ -462,7 +457,7 @@ class VideoPlayer : ConstraintLayout {
             if (playbackState == Player.STATE_ENDED) {
                 player?.playWhenReady = false
                 player?.seekTo(0L)
-                if(tagTimes.isNotEmpty()) {
+                if (tagTimes.isNotEmpty()) {
                     tagTimeIndex = 0
                     currentTagTime = tagTimes.elementAt(0)
                 }
@@ -506,15 +501,21 @@ class VideoPlayer : ConstraintLayout {
             if (!canceled) {
                 player?.seekTo(position)
             }
-            tagTimes.forEachIndexed { index, time ->
-                if(time>position){
-                    tagTimeIndex =   if(index>0) index-1 else index
-                    currentTagTime = tagTimes.elementAt(tagTimeIndex)
-                    return@forEachIndexed
-                }
-            }
+            findNearestTagTime(position, tagTimes)
             player?.playWhenReady = true
             handler?.post(updateProgressAction)
+        }
+    }
+
+    private fun findNearestTagTime(currentTime: Long, tagTimes: TreeSet<Long>) {
+        var smallestDifference = Long.MAX_VALUE
+        tagTimes.forEachIndexed { index, tagTime ->
+            val difference = abs(currentTime - tagTime)
+            if (difference < smallestDifference) {
+                smallestDifference = difference
+                tagTimeIndex = index
+                currentTagTime = this.tagTimes.elementAt(tagTimeIndex)
+            }
         }
     }
 
@@ -543,7 +544,7 @@ class VideoPlayer : ConstraintLayout {
                         tagTimeIndex++
                         tagTimes.elementAt(tagTimeIndex)
                     } else {
-                        -C.TIME_UNSET
+                        Long.MAX_VALUE
                     }
             } else {
                 // Schedule the next check after a certain delay (e.g., every second)
