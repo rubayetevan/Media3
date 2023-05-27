@@ -63,6 +63,7 @@ class VideoPlayer : ConstraintLayout {
         const val KEY_CURRENT_TAG_TIME = "current_tag_time"
         const val KEY_PAUSE_EDIT_ENABLED = "pause_enabled"
         const val KEY_AUTO_PAUSE_EDIT_ENABLED = "auto_pause_enabled"
+        const val KEY_AUTO_PAUSE_TIMER_REMAINING_TIME = "auto_pause_timer_remaining_time"
 
         private val speedMap: MutableMap<String, Float> = mutableMapOf(
             "x4" to 4f,
@@ -75,7 +76,6 @@ class VideoPlayer : ConstraintLayout {
             "x1/16" to 1 / 16f
         )
 
-        const val RUNNABLE_INTERVAL = 62L
     }
 
     private val activity: Activity = context as Activity
@@ -103,7 +103,8 @@ class VideoPlayer : ConstraintLayout {
     private var timer: CountDownTimer? = null
     private var currentTagTime: Long = Long.MAX_VALUE
     private var tagTimeIndex = 0
-    private var autoPauseIntervalIndex = 0
+    private var autoPauseIntervalIndex = -1
+    private var autoPauseTimerRemainingTime: Long = 0L
 
     fun setTagTimes(timeList: MutableList<Long>) {
         tagTimes.clear()
@@ -148,19 +149,29 @@ class VideoPlayer : ConstraintLayout {
             autoPauseIntervalIndex = it.getInt(KEY_AUTO_PAUSE_INTERVAL_INDEX)
             tagTimeIndex = it.getInt(KEY_TAG_TIME_INDEX)
             currentTagTime = it.getLong(KEY_CURRENT_TAG_TIME)
-            val tempAutoPauseIntervals = it.getLongArray(KEY_AUTO_PAUSE_INTERVALS)
-            autoPauseIntervals.clear()
-            tempAutoPauseIntervals?.forEach { interval ->
-                autoPauseIntervals.add(interval)
-            }
             val tempTagTimes = it.getLongArray(KEY_TAG_TIMES)
             tagTimes.clear()
             tempTagTimes?.forEach { time ->
                 tagTimes.add(time)
             }
-
+            it.getLongArray(KEY_AUTO_PAUSE_INTERVALS)?.toMutableList()
+                ?.let { times -> setAutoPauseIntervals(times) }
             autoPauseEditEnabled = it.getBoolean(KEY_AUTO_PAUSE_EDIT_ENABLED)
             pauseEditEnabled = it.getBoolean(KEY_PAUSE_EDIT_ENABLED)
+            autoPauseTimerRemainingTime = it.getLong(KEY_AUTO_PAUSE_TIMER_REMAINING_TIME)
+
+            if (pauseEditEnabled) {
+                binding.pauseEditBtn.background = pencilPauseDrawable
+                if (autoPauseEditEnabled) {
+                    binding.pauseTimeTV.visibility = View.VISIBLE
+                    binding.pauseTimeTV.text =
+                        (autoPauseIntervals.elementAt(autoPauseIntervalIndex) / 1000).toString()
+                    timer = autoPauseTimer(autoPauseTimerRemainingTime)
+                    timer?.start()
+                }
+            } else {
+                binding.pauseEditBtn.background = pencilPauseInactiveDrawable
+            }
 
         } ?: run {
             clearStartPosition()
@@ -253,8 +264,6 @@ class VideoPlayer : ConstraintLayout {
             playBackSpeedAlertDialog.show()
         }
 
-
-
         binding.pauseEditBtn.setOnClickListener {
             setupPauseEdit()
         }
@@ -265,44 +274,59 @@ class VideoPlayer : ConstraintLayout {
             binding.pauseEditBtn.background = pencilPauseDrawable
             pauseEditEnabled = true
         } else if (pauseEditEnabled) {
-            if (autoPauseIntervals.isNotEmpty() && autoPauseIntervalIndex < autoPauseIntervals.size) {
+            if (autoPauseIntervals.isNotEmpty() && autoPauseIntervalIndex < autoPauseIntervals.size.minus(
+                    1
+                )
+            ) {
+                autoPauseIntervalIndex++
                 binding.pauseTimeTV.visibility = View.VISIBLE
                 binding.pauseTimeTV.text =
                     (autoPauseIntervals.elementAt(autoPauseIntervalIndex) / 1000).toString()
                 autoPauseEditEnabled = true
-                val duration = autoPauseIntervals.elementAt(autoPauseIntervalIndex)
-                autoPauseIntervalIndex++
-                timer = object : CountDownTimer(duration, RUNNABLE_INTERVAL) {
-                    override fun onTick(millisUntilFinished: Long) {
-                        val progress = (millisUntilFinished / duration.toDouble()) * 100
-                        Log.d(
-                            TAG,
-                            "Progress = $progress millisUntilFinished = $millisUntilFinished duration = $duration"
-                        )
-                        binding.pauseProgressBar.progress = progress.toInt()
+                timer = autoPauseTimer(autoPauseIntervals.elementAt(autoPauseIntervalIndex))
 
-                        if (!binding.pauseProgressBar.isVisible) binding.pauseProgressBar.visibility =
-                            View.VISIBLE
-                        player?.playWhenReady = false
-                        changePlayPauseIcon()
-                    }
-
-                    override fun onFinish() {
-                        binding.pauseProgressBar.progress = 0
-                        if (binding.pauseProgressBar.isVisible) binding.pauseProgressBar.visibility =
-                            View.GONE
-
-                        player?.playWhenReady = true
-                        changePlayPauseIcon()
-                        handler?.postDelayed(autoPauseRunnable, RUNNABLE_INTERVAL)
-                    }
-                }
             } else {
                 binding.pauseTimeTV.visibility = View.GONE
-                autoPauseIntervalIndex = 0
+                autoPauseIntervalIndex = -1
                 pauseEditEnabled = false
                 autoPauseEditEnabled = false
                 binding.pauseEditBtn.background = pencilPauseInactiveDrawable
+            }
+        }
+    }
+
+    private fun autoPauseTimer(duration: Long): CountDownTimer {
+        return object : CountDownTimer(duration, 1L) {
+            override fun onTick(millisUntilFinished: Long) {
+                autoPauseTimerRemainingTime = millisUntilFinished
+                val progress =
+                    (millisUntilFinished / autoPauseIntervals.elementAt(autoPauseIntervalIndex)
+                        .toDouble()) * 100
+                Log.d(
+                    TAG,
+                    "Progress = $progress millisUntilFinished = $millisUntilFinished duration = $duration"
+                )
+                binding.pauseProgressBar.progress = progress.toInt()
+
+                if (!binding.pauseProgressBar.isVisible) binding.pauseProgressBar.visibility =
+                    View.VISIBLE
+                player?.playWhenReady = false
+                changePlayPauseIcon()
+            }
+
+            override fun onFinish() {
+                binding.pauseProgressBar.progress = 0
+                if (binding.pauseProgressBar.isVisible) binding.pauseProgressBar.visibility =
+                    View.GONE
+
+                player?.playWhenReady = true
+                changePlayPauseIcon()
+                if (autoPauseTimerRemainingTime < 100L) {
+                    autoPauseTimerRemainingTime = 0L
+                    timer = autoPauseTimer(autoPauseIntervals.elementAt(autoPauseIntervalIndex))
+                }
+
+                handler?.post(autoPauseRunnable)
             }
         }
     }
@@ -388,6 +412,7 @@ class VideoPlayer : ConstraintLayout {
         outState.putLong(KEY_CURRENT_TAG_TIME, currentTagTime)
         outState.putBoolean(KEY_AUTO_PAUSE_EDIT_ENABLED, autoPauseEditEnabled)
         outState.putBoolean(KEY_PAUSE_EDIT_ENABLED, pauseEditEnabled)
+        outState.putLong(KEY_AUTO_PAUSE_TIMER_REMAINING_TIME, autoPauseTimerRemainingTime)
     }
 
     @SuppressLint("UnsafeOptInUsageError")
@@ -448,7 +473,7 @@ class VideoPlayer : ConstraintLayout {
                     binding.duration.text = getPlayerTime(it)
                 }
                 handler?.post(updateProgressAction)
-                handler?.postDelayed(autoPauseRunnable, 1000L)
+                handler?.post(autoPauseRunnable)
             } else {
                 handler?.removeCallbacks(updateProgressAction)
                 handler?.removeCallbacks(autoPauseRunnable)
@@ -533,9 +558,8 @@ class VideoPlayer : ConstraintLayout {
                     timer?.start()
                 } else {
                     player?.playWhenReady = false
-                    handler?.postDelayed(this, RUNNABLE_INTERVAL)
+                    handler?.post(this)
                 }
-
 
                 changePlayPauseIcon()
 
@@ -547,8 +571,7 @@ class VideoPlayer : ConstraintLayout {
                         Long.MAX_VALUE
                     }
             } else {
-                // Schedule the next check after a certain delay (e.g., every second)
-                handler?.postDelayed(this, RUNNABLE_INTERVAL)
+                handler?.post(this)
             }
         }
     }

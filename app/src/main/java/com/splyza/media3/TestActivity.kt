@@ -30,8 +30,8 @@ class TestActivity : AppCompatActivity() {
         setContentView(view)
 
         binding.videoPlayer.onCreate(savedInstanceState, intent)
-        binding.videoPlayer.setAutoPauseIntervals(mutableListOf(12000))
-        binding.videoPlayer.setTagTimes(mutableListOf(9660,5000))
+        binding.videoPlayer.setAutoPauseIntervals(mutableListOf(12000,3000))
+        binding.videoPlayer.setTagTimes(mutableListOf(10000,5000))
     }
 
     override fun onStart() {
