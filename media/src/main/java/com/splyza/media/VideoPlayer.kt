@@ -166,8 +166,16 @@ class VideoPlayer : ConstraintLayout {
                     binding.pauseTimeTV.visibility = View.VISIBLE
                     binding.pauseTimeTV.text =
                         (autoPauseIntervals.elementAt(autoPauseIntervalIndex) / 1000).toString()
-                    timer = autoPauseTimer(autoPauseTimerRemainingTime)
-                    timer?.start()
+
+                    timer = if (autoPauseTimerRemainingTime == 0L) autoPauseTimer(
+                        autoPauseIntervals.elementAt(autoPauseIntervalIndex)
+                    ) else autoPauseTimer(
+                        autoPauseTimerRemainingTime
+                    )
+
+                    Log.d(TAG, "autoPauseTimerRemainingTime: $autoPauseTimerRemainingTime")
+
+
                 }
             } else {
                 binding.pauseEditBtn.background = pencilPauseInactiveDrawable
