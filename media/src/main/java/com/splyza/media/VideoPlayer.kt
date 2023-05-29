@@ -111,10 +111,6 @@ class VideoPlayer : ConstraintLayout {
         timeList.forEach {
             tagTimes.add(it)
         }
-
-        if (tagTimes.isNotEmpty()) {
-            currentTagTime = tagTimes.elementAt(tagTimeIndex)
-        }
     }
 
     fun setAutoPauseIntervals(timeList: MutableList<Long>) {
@@ -149,11 +145,7 @@ class VideoPlayer : ConstraintLayout {
             autoPauseIntervalIndex = it.getInt(KEY_AUTO_PAUSE_INTERVAL_INDEX)
             tagTimeIndex = it.getInt(KEY_TAG_TIME_INDEX)
             currentTagTime = it.getLong(KEY_CURRENT_TAG_TIME)
-            val tempTagTimes = it.getLongArray(KEY_TAG_TIMES)
-            tagTimes.clear()
-            tempTagTimes?.forEach { time ->
-                tagTimes.add(time)
-            }
+            it.getLongArray(KEY_TAG_TIMES)?.toMutableList()?.let { times -> setTagTimes(times) }
             it.getLongArray(KEY_AUTO_PAUSE_INTERVALS)?.toMutableList()
                 ?.let { times -> setAutoPauseIntervals(times) }
             autoPauseEditEnabled = it.getBoolean(KEY_AUTO_PAUSE_EDIT_ENABLED)
@@ -172,10 +164,6 @@ class VideoPlayer : ConstraintLayout {
                     ) else autoPauseTimer(
                         autoPauseTimerRemainingTime
                     )
-
-                    Log.d(TAG, "autoPauseTimerRemainingTime: $autoPauseTimerRemainingTime")
-
-
                 }
             } else {
                 binding.pauseEditBtn.background = pencilPauseInactiveDrawable
@@ -278,6 +266,7 @@ class VideoPlayer : ConstraintLayout {
     }
 
     private fun setupPauseEdit() {
+        player?.currentPosition?.let { ct -> findNearestTagTime(ct, tagTimes) }
         if (!pauseEditEnabled) {
             binding.pauseEditBtn.background = pencilPauseDrawable
             pauseEditEnabled = true
@@ -310,10 +299,10 @@ class VideoPlayer : ConstraintLayout {
                 val progress =
                     (millisUntilFinished / autoPauseIntervals.elementAt(autoPauseIntervalIndex)
                         .toDouble()) * 100
-                Log.d(
-                    TAG,
-                    "Progress = $progress millisUntilFinished = $millisUntilFinished duration = $duration"
-                )
+                /* Log.d(
+                     TAG,
+                     "Progress = $progress millisUntilFinished = $millisUntilFinished duration = $duration"
+                 )*/
                 binding.pauseProgressBar.progress = progress.toInt()
 
                 if (!binding.pauseProgressBar.isVisible) binding.pauseProgressBar.visibility =
@@ -361,7 +350,7 @@ class VideoPlayer : ConstraintLayout {
     @Suppress("unused")
     fun onNewIntent(intent: Intent?) {
         this.intent = intent
-        Log.d(TAG, "onNewIntent::intent =$intent")
+        //Log.d(TAG, "onNewIntent::intent =$intent")
         releasePlayer()
         clearStartPosition()
     }
@@ -480,6 +469,7 @@ class VideoPlayer : ConstraintLayout {
                     binding.timeBar.setDuration(it)
                     binding.duration.text = getPlayerTime(it)
                 }
+                player?.currentPosition?.let { ct -> findNearestTagTime(ct, tagTimes) }
                 handler?.post(updateProgressAction)
                 handler?.post(autoPauseRunnable)
             } else {
@@ -559,8 +549,15 @@ class VideoPlayer : ConstraintLayout {
 
     val autoPauseRunnable = object : Runnable {
         override fun run() {
+            val bufferTime = currentTagTime + (50L* speedMap[playBackSpeed]!!).toLong()
 
-            if (player != null && player?.currentPosition!! >= currentTagTime && pauseEditEnabled) {
+
+            if (player != null && (player?.currentPosition!! in currentTagTime..bufferTime) && pauseEditEnabled
+            ) {
+                Log.d(
+                    TAG,
+                    "player.currentPosition=${player?.currentPosition}  currentTagTime=$currentTagTime"
+                )
 
                 if (autoPauseEditEnabled) {
                     timer?.start()
