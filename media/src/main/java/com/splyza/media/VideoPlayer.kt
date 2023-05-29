@@ -106,14 +106,14 @@ class VideoPlayer : ConstraintLayout {
     private var autoPauseIntervalIndex = -1
     private var autoPauseTimerRemainingTime: Long = 0L
 
-    fun setTagTimes(timeList: MutableList<Long>) {
+    fun setTagTimes(timeList: List<Long>) {
         tagTimes.clear()
         timeList.forEach {
             tagTimes.add(it)
         }
     }
 
-    fun setAutoPauseIntervals(timeList: MutableList<Long>) {
+    fun setAutoPauseIntervals(timeList: List<Long>) {
         autoPauseIntervals.clear()
         timeList.forEach {
             autoPauseIntervals.add(it)
@@ -145,8 +145,8 @@ class VideoPlayer : ConstraintLayout {
             autoPauseIntervalIndex = it.getInt(KEY_AUTO_PAUSE_INTERVAL_INDEX)
             tagTimeIndex = it.getInt(KEY_TAG_TIME_INDEX)
             currentTagTime = it.getLong(KEY_CURRENT_TAG_TIME)
-            it.getLongArray(KEY_TAG_TIMES)?.toMutableList()?.let { times -> setTagTimes(times) }
-            it.getLongArray(KEY_AUTO_PAUSE_INTERVALS)?.toMutableList()
+            it.getLongArray(KEY_TAG_TIMES)?.toList()?.let { times -> setTagTimes(times) }
+            it.getLongArray(KEY_AUTO_PAUSE_INTERVALS)?.toList()
                 ?.let { times -> setAutoPauseIntervals(times) }
             autoPauseEditEnabled = it.getBoolean(KEY_AUTO_PAUSE_EDIT_ENABLED)
             pauseEditEnabled = it.getBoolean(KEY_PAUSE_EDIT_ENABLED)
