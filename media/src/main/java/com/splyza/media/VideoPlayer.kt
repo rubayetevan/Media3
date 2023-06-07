@@ -15,7 +15,6 @@ import android.os.CountDownTimer
 import android.os.Handler
 import android.os.Looper
 import android.util.AttributeSet
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.ScaleGestureDetector
@@ -52,18 +51,18 @@ class VideoPlayer : ConstraintLayout {
     companion object {
         private const val TAG = "VideoPlayer"
         const val KEY_VIDEO_SOURCE = "videoSource"
-        const val KEY_POSITION = "position"
-        const val KEY_AUTO_PLAY = "auto_play"
-        const val KEY_PLAYBACK_SPEED = "playback_speed"
-        const val KEY_SCALE_FACTOR = "scale_factor"
-        const val KEY_AUTO_PAUSE_INTERVALS = "auto_pause_intervals"
-        const val KEY_TAG_TIMES = "tag_times"
-        const val KEY_TAG_TIME_INDEX = "tag_time_index"
-        const val KEY_AUTO_PAUSE_INTERVAL_INDEX = "auto_pause_interval_index"
-        const val KEY_CURRENT_TAG_TIME = "current_tag_time"
-        const val KEY_PAUSE_EDIT_ENABLED = "pause_enabled"
-        const val KEY_AUTO_PAUSE_EDIT_ENABLED = "auto_pause_enabled"
-        const val KEY_AUTO_PAUSE_TIMER_REMAINING_TIME = "auto_pause_timer_remaining_time"
+        private const val KEY_POSITION = "position"
+        private const val KEY_AUTO_PLAY = "auto_play"
+        private const val KEY_PLAYBACK_SPEED = "playback_speed"
+        private const val KEY_SCALE_FACTOR = "scale_factor"
+        private const val KEY_AUTO_PAUSE_INTERVALS = "auto_pause_intervals"
+        private const val KEY_TAG_TIMES = "tag_times"
+        private const val KEY_TAG_TIME_INDEX = "tag_time_index"
+        private const val KEY_AUTO_PAUSE_INTERVAL_INDEX = "auto_pause_interval_index"
+        private const val KEY_CURRENT_TAG_TIME = "current_tag_time"
+        private const val KEY_PAUSE_EDIT_ENABLED = "pause_enabled"
+        private const val KEY_AUTO_PAUSE_EDIT_ENABLED = "auto_pause_enabled"
+        private const val KEY_AUTO_PAUSE_TIMER_REMAINING_TIME = "auto_pause_timer_remaining_time"
 
         private val speedMap: MutableMap<String, Float> = mutableMapOf(
             "x4" to 4f,
@@ -241,16 +240,16 @@ class VideoPlayer : ConstraintLayout {
         binding.replayBTN.setOnClickListener {
 
             player?.let {
-                if (it.contentPosition >= 5000L) {
-                    it.seekTo(it.contentPosition - 5000L)
+                if (it.currentPosition >= 5000L) {
+                    it.seekTo(it.currentPosition - 5000L)
                 }
             }
         }
 
         binding.forwardBTN.setOnClickListener {
             player?.let {
-                if (it.contentPosition <= it.duration - 5000L) {
-                    it.seekTo(it.contentPosition + 5000L)
+                if (it.currentPosition <= it.duration - 5000L) {
+                    it.seekTo(it.currentPosition + 5000L)
                 }
             }
         }
@@ -302,10 +301,7 @@ class VideoPlayer : ConstraintLayout {
                 val progress =
                     (millisUntilFinished / autoPauseIntervals.elementAt(autoPauseIntervalIndex)
                         .toDouble()) * 100
-                /* Log.d(
-                     TAG,
-                     "Progress = $progress millisUntilFinished = $millisUntilFinished duration = $duration"
-                 )*/
+
                 binding.pauseProgressBar.progress = progress.toInt()
 
                 if (!binding.pauseProgressBar.isVisible) binding.pauseProgressBar.visibility =
@@ -350,14 +346,6 @@ class VideoPlayer : ConstraintLayout {
         }
     }
 
-    @Suppress("unused")
-    fun onNewIntent(intent: Intent?) {
-        this.intent = intent
-        //Log.d(TAG, "onNewIntent::intent =$intent")
-        releasePlayer()
-        clearStartPosition()
-    }
-
     private fun releasePlayer() {
         player?.let {
             updateStartPosition()
@@ -365,13 +353,15 @@ class VideoPlayer : ConstraintLayout {
             player = null
             binding.playerView.player = null
         }
+        timer?.cancel()
         handler?.removeCallbacks(updateProgressAction)
+        handler?.removeCallbacks(autoPauseRunnable)
     }
 
     private fun updateStartPosition() {
         player?.let {
             startAutoPlay = it.playWhenReady
-            startPosition = max(0, it.contentPosition)
+            startPosition = max(0, it.currentPosition)
         }
     }
 
@@ -396,7 +386,6 @@ class VideoPlayer : ConstraintLayout {
     fun onStop() {
         binding.playerView.onPause()
         releasePlayer()
-        timer?.cancel()
     }
 
     fun onSaveInstanceState(outState: Bundle) {
@@ -457,7 +446,7 @@ class VideoPlayer : ConstraintLayout {
             if (!isScrubbing) {
                 player?.let {
                     binding.position.text = getPlayerTime(it.currentPosition)
-                    binding.timeBar.setPosition(it.contentPosition)
+                    binding.timeBar.setPosition(it.currentPosition)
                 }
             }
             handler?.post(this)
@@ -488,7 +477,7 @@ class VideoPlayer : ConstraintLayout {
                 }
                 handler?.removeCallbacks(autoPauseRunnable)
 
-                isTagTimeVisited.forEach { (t, u) ->
+                isTagTimeVisited.forEach { (t, _) ->
                     isTagTimeVisited[t] = false
                 }
             }
@@ -534,7 +523,7 @@ class VideoPlayer : ConstraintLayout {
             }
             findNearestTagTime(position, tagTimes)
 
-            isTagTimeVisited.forEach { (t, u) ->
+            isTagTimeVisited.forEach { (t, _) ->
                 if (t >= currentTagTime) {
                     isTagTimeVisited[t] = false
                 }
@@ -566,16 +555,22 @@ class VideoPlayer : ConstraintLayout {
     @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     val autoPauseRunnable = object : Runnable {
         override fun run() {
+
+            if (player == null)
+                return
+
             val bufferTime = currentTagTime - (50L * speedMap[playBackSpeed]!!).toLong()
 
             if (pauseEditEnabled && isTagTimeVisited[currentTagTime] == false && (player?.currentPosition!! in bufferTime..currentTagTime)
             ) {
                 isTagTimeVisited[currentTagTime] = true
-
+                player?.playWhenReady = false
                 player?.seekTo(currentTagTime)
-                binding.timeBar.setPosition(currentTagTime)
-                binding.position.text = getPlayerTime(currentTagTime)
-
+                player?.currentPosition?.let { ct ->
+                    binding.timeBar.setPosition(ct)
+                    binding.position.text = getPlayerTime(ct)
+                }
+                changePlayPauseIcon()
                 currentTagTime =
                     if (tagTimes.isNotEmpty() && tagTimeIndex < (tagTimes.size.minus(1))) {
                         tagTimeIndex++
@@ -587,11 +582,8 @@ class VideoPlayer : ConstraintLayout {
                 if (autoPauseEditEnabled) {
                     timer?.start()
                 } else {
-                    player?.playWhenReady = false
                     handler?.post(this)
                 }
-                changePlayPauseIcon()
-
             } else {
                 handler?.post(this)
             }
