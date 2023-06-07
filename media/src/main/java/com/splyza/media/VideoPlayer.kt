@@ -444,9 +444,9 @@ class VideoPlayer : ConstraintLayout {
     private val updateProgressAction = object : Runnable {
         override fun run() {
             if (!isScrubbing) {
-                player?.let {
-                    binding.position.text = getPlayerTime(it.currentPosition)
-                    binding.timeBar.setPosition(it.currentPosition)
+                player?.currentPosition?.let {
+                    binding.position.text = getPlayerTime(it)
+                    binding.timeBar.setPosition(it)
                 }
             }
             handler?.post(this)
