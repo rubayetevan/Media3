@@ -161,12 +161,19 @@ class VideoPlayer : ConstraintLayout {
                     binding.pauseTimeTV.text =
                         (autoPauseIntervals.elementAt(autoPauseIntervalIndex) / 1000).toString()
 
-                    timer = if (autoPauseTimerRemainingTime == 0L) autoPauseTimer(
-                        autoPauseIntervals.elementAt(autoPauseIntervalIndex)
-                    ) else autoPauseTimer(
-                        autoPauseTimerRemainingTime
-                    )
+                    if (autoPauseTimerRemainingTime == 0L) {
+                        timer = autoPauseTimer(autoPauseIntervals.elementAt(autoPauseIntervalIndex))
+                    } else {
+                        timer = autoPauseTimer(autoPauseTimerRemainingTime)
+                        timer?.start()
+                    }
                 }
+
+                if (handler == null) {
+                    handler = Handler(Looper.getMainLooper())
+                }
+                handler?.post(autoPauseRunnable)
+
             } else {
                 binding.pauseEditBtn.background = pencilPauseInactiveDrawable
             }
