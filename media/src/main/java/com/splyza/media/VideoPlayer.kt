@@ -106,10 +106,13 @@ class VideoPlayer : ConstraintLayout {
     private var autoPauseIntervalIndex = -1
     private var autoPauseTimerRemainingTime: Long = 0L
 
+    private val isTagTimeVisited = mutableMapOf<Long, Boolean>()
+
     fun setTagTimes(timeList: List<Long>) {
         tagTimes.clear()
         timeList.forEach {
             tagTimes.add(it)
+            isTagTimeVisited[it] = false
         }
     }
 
@@ -469,7 +472,6 @@ class VideoPlayer : ConstraintLayout {
                     binding.timeBar.setDuration(it)
                     binding.duration.text = getPlayerTime(it)
                 }
-                player?.currentPosition?.let { ct -> findNearestTagTime(ct, tagTimes) }
                 handler?.post(updateProgressAction)
                 handler?.post(autoPauseRunnable)
             } else {
@@ -483,6 +485,11 @@ class VideoPlayer : ConstraintLayout {
                 if (tagTimes.isNotEmpty()) {
                     tagTimeIndex = 0
                     currentTagTime = tagTimes.elementAt(0)
+                }
+                handler?.removeCallbacks(autoPauseRunnable)
+
+                isTagTimeVisited.forEach { (t, u) ->
+                    isTagTimeVisited[t] = false
                 }
             }
 
@@ -513,6 +520,7 @@ class VideoPlayer : ConstraintLayout {
             isScrubbing = true
             player?.playWhenReady = false
             handler?.removeCallbacks(updateProgressAction)
+            changePlayPauseIcon()
         }
 
         override fun onScrubMove(timeBar: TimeBar, position: Long) {
@@ -525,8 +533,16 @@ class VideoPlayer : ConstraintLayout {
                 player?.seekTo(position)
             }
             findNearestTagTime(position, tagTimes)
+
+            isTagTimeVisited.forEach { (t, u) ->
+                if (t >= currentTagTime) {
+                    isTagTimeVisited[t] = false
+                }
+            }
+
             player?.playWhenReady = true
             handler?.post(updateProgressAction)
+            changePlayPauseIcon()
         }
     }
 
@@ -547,26 +563,18 @@ class VideoPlayer : ConstraintLayout {
         requestLayout()
     }
 
+    @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
     val autoPauseRunnable = object : Runnable {
         override fun run() {
-            val bufferTime = currentTagTime + (50L* speedMap[playBackSpeed]!!).toLong()
+            val bufferTime = currentTagTime - (50L * speedMap[playBackSpeed]!!).toLong()
 
-
-            if (player != null && (player?.currentPosition!! in currentTagTime..bufferTime) && pauseEditEnabled
+            if (pauseEditEnabled && isTagTimeVisited[currentTagTime] == false && (player?.currentPosition!! in bufferTime..currentTagTime)
             ) {
-                Log.d(
-                    TAG,
-                    "player.currentPosition=${player?.currentPosition}  currentTagTime=$currentTagTime"
-                )
+                isTagTimeVisited[currentTagTime] = true
 
-                if (autoPauseEditEnabled) {
-                    timer?.start()
-                } else {
-                    player?.playWhenReady = false
-                    handler?.post(this)
-                }
-
-                changePlayPauseIcon()
+                player?.seekTo(currentTagTime)
+                binding.timeBar.setPosition(currentTagTime)
+                binding.position.text = getPlayerTime(currentTagTime)
 
                 currentTagTime =
                     if (tagTimes.isNotEmpty() && tagTimeIndex < (tagTimes.size.minus(1))) {
@@ -575,6 +583,15 @@ class VideoPlayer : ConstraintLayout {
                     } else {
                         Long.MAX_VALUE
                     }
+
+                if (autoPauseEditEnabled) {
+                    timer?.start()
+                } else {
+                    player?.playWhenReady = false
+                    handler?.post(this)
+                }
+                changePlayPauseIcon()
+
             } else {
                 handler?.post(this)
             }
